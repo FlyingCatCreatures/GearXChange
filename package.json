@@ -1,5 +1,5 @@
 {
-  "name": "ouiouibaguette",
+  "name": "GearXChange",
   "version": "1.0.0",
   "description": "Project for R&D",
   "main": "main.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.science.ru.nl/aharsta/ouiouibaguette/"
+    "url": "https://github.com/FlyingCatCreatures/GearXChange"
   },
   "author": "Anne Harsta, Gijon v. Bokkem, Fabian Groen, Rik v. Uden",
   "license": "ISC",
