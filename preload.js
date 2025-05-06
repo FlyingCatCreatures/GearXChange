@@ -1,12 +1,9 @@
+// Needed for page switching
+const { contextBridge, ipcRenderer } = require('electron');
 
-
-window.addEventListener('DOMContentLoaded', () => {
-    function replaceText(selector, text){
-        const element = document.getElementById(selector)
-        if (element) element.innerText = text
-    }
-
-    for (const dependency of ['chrome', 'node', 'electron']) {
-      replaceText(`${dependency}-version`, process.versions[dependency])
-    }
-  })
+contextBridge.exposeInMainWorld('api', {
+  gotoPage: (page) => ipcRenderer.send('goto-page', page),
+  getWindow: () => {return ipcRenderer.sendSync('get-window');},
+  once: (event, callback) => {ipcRenderer.once(event, callback);}
+});
+  
