@@ -16,7 +16,7 @@ function createWindow() {
         },
     });
 
-    win.loadFile('homepage.html');
+    win.loadFile('index.html');
 
     // Open dev tools only when run with npm run dev
     if (process.env.NODE_ENV === 'development') {
