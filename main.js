@@ -5,7 +5,6 @@ const path = require('node:path')
 // Import function to create window from the windowmanager
 const { createWindow, getWindow } = require('./windowManager');
 
-
 // Lots of errors interacting with GPU and networking if this isnt included
 app.commandLine.appendSwitch('no-sandbox')
 
@@ -23,3 +22,7 @@ ipcMain.on('goto-page', (event, page) => {
 ipcMain.handle('get-window', () => {
   return getWindow();
 });
+
+
+// Database testing done in this file
+require('./database')
