@@ -25,4 +25,4 @@ ipcMain.handle('get-window', () => {
 
 
 // Database testing done in this file
-require('./database')
+// require('./database')

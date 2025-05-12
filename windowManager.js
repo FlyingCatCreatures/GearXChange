@@ -1,4 +1,3 @@
-// filepath: /Users/anne/Desktop/Uni-Stuff/2024-2025/KW3:KW4/GearXChange/windowManager.js
 const { BrowserWindow } = require('electron');
 const path = require('node:path');
 
