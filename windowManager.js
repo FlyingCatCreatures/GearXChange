@@ -1,3 +1,4 @@
+// filepath: /Users/anne/Desktop/Uni-Stuff/2024-2025/KW3:KW4/GearXChange/windowManager.js
 const { BrowserWindow } = require('electron');
 const path = require('node:path');
 
@@ -16,7 +17,11 @@ function createWindow() {
     });
 
     win.loadFile('index.html');
-    win.webContents.openDevTools({ mode: 'bottom' });
+
+    // Open dev tools only when run with npm run dev
+    if (process.env.NODE_ENV === 'development') {
+        win.webContents.openDevTools({ mode: 'bottom' });
+    }
 
     win.webContents.on('did-finish-load', () => {
         win.webContents.send('window-ready');
