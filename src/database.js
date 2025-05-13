@@ -112,7 +112,6 @@ class Database {
 
 }
 
-// Export the database instance
 // This is a singleton pattern, so we only have one instance of the database
 const db = new Database(':memory:'); 
 module.exports = db;
