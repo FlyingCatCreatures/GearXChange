@@ -1,5 +1,6 @@
 async function fetchData() {
     try {
+        document.getElementById('main-body').innerHTML = '<p>Fetching data...</p>';
         const query = `
             SELECT 
                 users.full_name AS user_name,

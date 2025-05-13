@@ -14,7 +14,7 @@ app.whenReady().then(()=>{
             focusable: true,
         },
     });
-    win.loadFile('index.html');
+    win.loadFile('src/index.html');
     // Open dev tools only when run with npm run dev
     if (process.env.NODE_ENV === 'development') {  
         win.webContents.openDevTools({ mode: 'bottom' });
@@ -25,7 +25,7 @@ app.whenReady().then(()=>{
     return win;
 });     
 
-const Database = require('./databaseClass');
+const Database = require('./database');
 const db = new Database(':memory:');
 ipcMain.handle('run-query', async (event, query) => {
     return new Promise((resolve, reject) => {
