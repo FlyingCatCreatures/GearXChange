@@ -2,7 +2,7 @@
   "name": "GearXChange",
   "version": "1.0.0",
   "description": "Project for R&D",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "test": "test",
