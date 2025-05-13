@@ -14,10 +14,16 @@
         }
 
         .listings-container {
-            display: none; /* Hide the container initially */
+            display: none;
+            padding: 10px;
         }
         .listing {
-            margin-left: 20px;
+            border-radius: 25px;
+            border: 4px double #73AD21;
+            padding: 20px;
+            margin-left: 10px;
+            margin-bottom: 10px;
+            margin-top: 10px;
         }
 
         .toggle-button {
@@ -91,14 +97,12 @@
                                     <p><strong>Location:</strong> ${listing.listing_location}</p>
                                     <p><strong>Description:</strong> ${listing.listing_description}</p>
                                     <h4>Product Details:</h4>
-                                    <ul>
-                                        <li><strong>Make:</strong> ${listing.product_make}</li>
-                                        <li><strong>Model:</strong> ${listing.product_model}</li>
-                                        <li><strong>Vehicle Type:</strong> ${listing.product_vehicle_type}</li>
-                                        <li><strong>Year of Manufacture:</strong> ${listing.product_year}</li>
-                                        <li><strong>Fuel/Power:</strong> ${listing.product_fuel}</li>
-                                        <li><strong>Weight:</strong> ${listing.product_weight} kg</li>
-                                    </ul>
+                                        <p><strong>Make:</strong> ${listing.product_make}</p>
+                                        <p><strong>Model:</strong> ${listing.product_model}</p>
+                                        <p><strong>Vehicle Type:</strong> ${listing.product_vehicle_type}</p>
+                                        <p><strong>Year of Manufacture:</strong> ${listing.product_year}</p>
+                                        <p><strong>Fuel/Power:</strong> ${listing.product_fuel}</p>
+                                        <p><strong>Weight:</strong> ${listing.product_weight} kg</p>
                                 </div>
                             `;
                         });
