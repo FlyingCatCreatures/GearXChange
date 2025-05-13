@@ -74,7 +74,7 @@
                             listings: []
                         });
                     }
-                    if (row.listing_title) { // If this person has a listing
+                    if (row.listing_title) { // If this person has a listing, I.E. the listing title is not null
                         usersMap.get(row.user_name).listings.push(row);
                     }
                 });
@@ -85,9 +85,10 @@
                     userSection.classList.add('user-section');
 
                     const listings = userData.listings;
-                    let listingsHTML = '';
+
 
                     if (listings.length > 0) {
+                        let listingsHTML = '';
                         listings.forEach(listing => {
                             listingsHTML += `
                                 <div class="listing">
@@ -106,20 +107,23 @@
                                 </div>
                             `;
                         });
+                        userSection.innerHTML = `
+                            <h2>User: ${userName} (${userData.email})</h2>
+                            <span class="toggle-button" onclick="toggleListings(this)">Show Listings</span>
+                            <div class="listings-container">
+                                ${listingsHTML}
+                            </div>
+                            `;
                     } else {
-                        listingsHTML = '<p>No active listings.</p>';
+                        userSection.innerHTML = `
+                            <h2>User: ${userName} (${userData.email})</h2>
+                            <div class="listings-container">
+                                <p>No active listings.</p>
+                            </div>
+                            `;
                     }
 
-                    userSection.innerHTML = `
-                        <h2>User: ${userName} (${userData.email})</h2>
-                        ${listings.length > 0 
-                            ? `<span class="toggle-button" onclick="toggleListings(this)">Show Listings</span>` 
-                            : ''}
-                        <div class="listings-container">
-                            ${listingsHTML}
-                        </div>
-                    `;
-                    console.log('user', userName, '\nhtml:', userSection.innerHTML, '\n\n');
+
                     container.appendChild(userSection);
                 });
             } catch (error) {
