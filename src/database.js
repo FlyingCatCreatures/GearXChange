@@ -1,26 +1,17 @@
 const sqlite3 = require('sqlite3').verbose();
 
 class Database {
+    #db;
     constructor(file) {
         this.db = new sqlite3.Database(file);
 
         // Currently, we're using a database in memmory not a file, so nothing is saved
         // Therefore the database has to be recreated every time the app is started
-        this.createTables();
-        this.insertValues();
+        this.#createTables();
+        this.#insertValues();
     }
 
-    #close() {
-        this.db.close((err) => {
-            if (err) {
-                console.error(err.message);
-            } else {
-                console.log("Database closed.");
-            }
-        });
-    }
-
-    createTables() {
+    #createTables() {
         this.db.serialize(() => {
             // Main table of all available listings
             this.db.run(
@@ -66,7 +57,7 @@ class Database {
 
     }
 
-    insertValues() {
+    #insertValues() {
         this.db.serialize(() => {
             // Initialize listings
             this.db.run(
@@ -113,26 +104,15 @@ class Database {
             console.log("Inserted initial values.");
         });
     }
+    
     //DANGEROUS! JUST FOR TESTING
-    run(command){
-        this.db.serialize(() => {
-            this.db.run(command, (err) => {
-                if (err) {
-                    console.error(err.message);
-                }
-            });
-        });
+    all(query, callback) {
+        this.db.all(query, callback);
     }
-    //DANGEROUS! JUST FOR TESTING
-    all(command){
-        this.db.serialize(() => {
-            this.db.all(command, (err) => {
-                if (err) {
-                    console.error(err.message);
-                }
-            });
-        });
-    }
+
 }
 
-module.exports = Database;
+// Export the database instance
+// This is a singleton pattern, so we only have one instance of the database
+const db = new Database(':memory:'); 
+module.exports = db;

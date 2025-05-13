@@ -25,11 +25,10 @@ app.whenReady().then(()=>{
     return win;
 });     
 
-const Database = require('./database');
-const db = new Database(':memory:');
+const db = require('./database');
 ipcMain.handle('run-query', async (event, query) => {
     return new Promise((resolve, reject) => {
-        db.db.all(query, (err, rows) => {
+        db.all(query, (err, rows) => {
             if (err) {
                 reject(err.message);
             } else if (rows.length > 0) {
