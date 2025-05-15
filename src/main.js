@@ -40,5 +40,27 @@ ipcMain.handle('run-query', async (event, query) => {
     });
 });
 
+ipcMain.handle('add-user', async (event, username, email, password_hash, full_name, phone, location) => {
+    return new Promise((resolve, reject) => {
+        db.addUser(username, email, password_hash, full_name, phone, location);
+        resolve('User added successfully.');
+    });
+});
+
+ipcMain.handle('add-listing', async (event,
+    title, price, price_type, condition, location, picture_url, description, 
+    make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, 
+    user_id
+) => {
+    return new Promise((resolve, reject) => {
+        db.createListing(
+            title, price, price_type, condition, location, picture_url, description, 
+            make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, 
+            user_id
+        );
+        resolve('Listing created successfully.');
+    });
+});
+
 // Quit when all windows are closed
 app.on('window-all-closed', () => app.quit());
