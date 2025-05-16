@@ -62,5 +62,25 @@ ipcMain.handle('add-listing', async (event,
     });
 });
 
+ipcMain.handle('verify-user-name', async (event, username, password) => {
+    try {
+        const result = await db.verifyUserByName(username, password);
+        return result; 
+    } catch (err) {
+        console.error("Error verifying user by name:", err.message);
+        return false; 
+    }
+});
+
+ipcMain.handle('verify-user-email', async (event, email, password) => {
+    try {
+        const result = await db.verifyUserByEmail(email, password);
+        return result; 
+    } catch (err) {
+        console.error("Error verifying user by email:", err.message);
+        return false; 
+    }
+});
+
 // Quit when all windows are closed
 app.on('window-all-closed', () => app.quit());

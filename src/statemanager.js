@@ -9,7 +9,7 @@ states.set('Login', `
     <div class="add-listing-form">
         <h3>Login</h3>
         <form id="login-form">
-            <label for="username">Username:</label>
+            <label for="username">Username/email:</label>
             <input type="text" id="username" name="username" required>
 
             <label for="password">Password:</label>

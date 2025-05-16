@@ -3,14 +3,30 @@ function handleLoginForm() {
     const signupButton = document.getElementById('signup-button');
 
     if (loginForm) {
-        loginForm.addEventListener('submit', (event) => {
+        loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Handle login logic here (e.g., send data to server)
-            console.log(`Logging in with Username: ${username}, Password: ${password}`);
-            console.log('Logging in is not yet implemented.'); 
+            try {
+                const isVerified = 
+                    await window.database.verifyUserByName(username, password) 
+                    || 
+                    await window.database.verifyUserByEmail(username, password);
+                console.log("User verified:", isVerified);
+                if (isVerified) {
+                    alert("Login successful!");
+                    // TODO: implement actually having logged in
+                    // For now, we just navigate to the home page
+                    navigate('Home');
+                } else {
+                    console.log("Invalid username or password.");
+                    alert("Invalid username or password.");
+                }
+            } catch (err) {
+                console.error("Error during login:", err.message);
+                alert("An error occurred during login. Please try again.");
+            }
         });
     }
 
@@ -27,7 +43,7 @@ function handleLoginForm() {
                     window.database.addUser(
                         document.getElementById('new-username').value, 
                         document.getElementById('email').value, 
-                        document.getElementById('new-password'), 
+                        document.getElementById('new-password').value, 
                         document.getElementById('full-name').value, 
                         document.getElementById('phone').value, 
                         document.getElementById('location').value);

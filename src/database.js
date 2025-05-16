@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-
+const md5 = require('md5');
 class Database {
     #db;
     #usernameRegex = /^[a-zA-Z0-9_]{3,20}$/; // Alphanumeric and underscores, 3-20 characters
@@ -9,7 +9,9 @@ class Database {
     // Note that it should fail when the 'multiple' attribute is set, as something like "a@p.com,b@p.com" is not a valid email
     #emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/; 
     #phoneRegex = /^(?:\d{2}-|\d{3}-|\d{2}|\d{3})?\d{8}$/; 
-
+    #random_salt = Math.floor(Math.random() * 500000)+500000; // Random salt for hashing
+    #hash = (password, username) => md5("gearXchange" + this.#random_salt + password + username); // Hash function with random salt and userspecific salt
+    
     constructor(file) {
         this.#db = new sqlite3.Database(file);
 
@@ -18,7 +20,6 @@ class Database {
         this.#createTables();
         this.#insertValues();
     }
-
 
     #createTables() {
         this.#db.serialize(() => {
@@ -49,7 +50,7 @@ class Database {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
                     email TEXT NOT NULL UNIQUE,
-                    password_hash TEXT NOT NULL,
+                    password_hash TEXT,
                     full_name TEXT,
                     phone TEXT,
                     location TEXT,
@@ -62,63 +63,124 @@ class Database {
     }
 
     #insertValues() {
-        this.#db.serialize(() => {
-            // Initialize listings with merged product details
-            this.#db.run(
-                `INSERT INTO 
-                machinery_listings (title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id)
-                VALUES 
-                    ('John Deere 5075E Tractor', 32500.00, 'negotiable', 'used', 'Springfield, MO', 'johndeere-5075e.jpg', '2018 model with 450 engine hours. Includes front loader and 3-point hitch. Well-maintained service records.', 'John Deere', '5075E', 'Utility Tractor', 2018, 'Diesel', 5075, 1),
-                    ('Bush Hog SQ720 Rotary Cutter', 2200.00, 'fixed', 'used', 'Springfield, MO', 'bush-hog-sq720.jpg', '6ft heavy-duty brush cutter. Good condition - ready for field work.', 'Bush Hog', 'SQ720', 'Rotary Cutter', 2017, 'PTO Powered', 1200, 1),
-                    ('Krone 4x4 Round Baler', 18500.00, 'negotiable', 'used', 'Springfield, MO', 'krone-balers.jpg', '2019 model. Twine wrap system. 5000 bales made. Stored under cover.', 'Krone', '4x4', 'Round Baler', 2019, 'Hydraulic', 3500, 1),
-                    ('Case IH 2206 Cotton Picker', 149999.00, 'negotiable', 'used', 'Green Valley Farm, KS', 'case-ih-2206.jpg', '2015 model w/ 2300 engine hours. 4-row narrow picker. Field-ready condition.', 'Case IH', '2206', 'Cotton Picker', 2015, 'Diesel', 18000, 2),
-                    ('Kubota L2501 Compact Tractor', 19500.00, 'fixed', 'new', 'Wichita, KS', 'kubota-l2501.jpg', 'Brand new 25HP tractor with loader. 0 hours. Financing available.', 'Kubota', 'L2501', 'Compact Tractor', 2023, 'Diesel', 2532, 3),
-                    ('Horsch Joker 4 Cultivator', 8750.00, 'negotiable', 'used', 'Wichita, KS', 'horsch-joker4.jpg', '12ft working width. Excellent seedbed preparation tool.', 'Horsch', 'Joker 4', 'Cultivator', 2020, 'Tractor-Powered', 1800, 3),
-                    ('New Holland H7250 Baler', 42200.00, 'fixed', 'used', 'Heartland Vineyards, MO', 'newholland-h7250.jpg', '2020 model square baler. Net wrap system. Only 1500 bales made.', 'New Holland', 'H7250', 'Square Baler', 2020, 'Hydraulic', 4200, 5);`
-            );
+        // Insert initial listings and users using the class methods
+        try {
+            // Insert users
+            this.addUser('john_doe', 'john.doe@agritech.com', 'password1', 'John Doe', '(417) 555-0123', 'Springfield, MO');
+            this.addUser('sarah_smith', 'sarah.smith@greenvalley.org', 'password2', 'Sarah Smith', '(620) 555-0456', 'Green Valley Farm, KS');
+            this.addUser('mike_chen', 'mike.chen@premiumfarms.co', 'password3', 'Michael Chen', '(316) 555-0789', 'Wichita, KS');
+            this.addUser('em_jackson', 'emily.j@sunnyacres.com', 'password4', 'Emily Jackson', '(785) 555-0248', 'Sunny Acres Ranch, NE');
+            this.addUser('carlos_m', 'carlos.mendoza@vinyard.org', 'password5', 'Carlos Mendoza', '(913) 555-0999', 'Heartland Vineyards, MO');
+            this.addUser('linda_weber', 'linda.weber@protonmail.com', 'password6', 'Linda Weber', '(314) 555-0333', 'St. Louis, MO');
 
-            // Initialize users
-            this.#db.run(
-                `INSERT INTO 
-                users (id, username, email, password_hash, full_name, phone, location)
-                VALUES 
-                    (1, 'john_doe', 'john.doe@agritech.com', '5f4dcc3b5aa765d61d8327deb882cf99', 'John Doe', '(417) 555-0123', 'Springfield, MO'),
-                    (2, 'sarah_smith', 'sarah.smith@greenvalley.org', '6c569aabbf7775ef8fc5705a9f1f9b2f', 'Sarah Smith', '(620) 555-0456', 'Green Valley Farm, KS'),
-                    (3, 'mike_chen', 'mike.chen@premiumfarms.co', '098f6bcd4621d373cade4e832627b4f6', 'Michael Chen', '(316) 555-0789', 'Wichita, KS'),
-                    (4, 'em_jackson', 'emily.j@sunnyacres.com', 'd8578edf8458ce06fbc5bb76a58c5ca4', 'Emily Jackson', '(785) 555-0248', 'Sunny Acres Ranch, NE'),
-                    (5, 'carlos_m', 'carlos.mendoza@vinyard.org', 'e99a18c428cb38d5f260853678922e03', 'Carlos Mendoza', '(913) 555-0999', 'Heartland Vineyards, MO'),
-                    (6, 'linda_weber', 'linda.weber@protonmail.com', 'b1b3773a05c0ed0176787a4f1574ff00', 'Linda Weber', '(314) 555-0333', 'St. Louis, MO');`
-            );
-
-            console.log("Inserted initial values.");
-        });
+            // Insert listings
+            this.createListing('John Deere 5075E Tractor', 32500.00, 'negotiable', 'used', 'Springfield, MO', 'johndeere-5075e.jpg', '2018 model with 450 engine hours. Includes front loader and 3-point hitch. Well-maintained service records.', 'John Deere', '5075E', 'Utility Tractor', 2018, 'Diesel', 5075, 1);
+            this.createListing('Bush Hog SQ720 Rotary Cutter', 2200.00, 'fixed', 'used', 'Springfield, MO', 'bush-hog-sq720.jpg', '6ft heavy-duty brush cutter. Good condition - ready for field work.', 'Bush Hog', 'SQ720', 'Rotary Cutter', 2017, 'PTO Powered', 1200, 1);
+            this.createListing('Krone 4x4 Round Baler', 18500.00, 'negotiable', 'used', 'Springfield, MO', 'krone-balers.jpg', '2019 model. Twine wrap system. 5000 bales made. Stored under cover.', 'Krone', '4x4', 'Round Baler', 2019, 'Hydraulic', 3500, 1);
+            this.createListing('Case IH 2206 Cotton Picker', 149999.00, 'negotiable', 'used', 'Green Valley Farm, KS', 'case-ih-2206.jpg', '2015 model w/ 2300 engine hours. 4-row narrow picker. Field-ready condition.', 'Case IH', '2206', 'Cotton Picker', 2015, 'Diesel', 18000, 2);
+            this.createListing('Kubota L2501 Compact Tractor', 19500.00, 'fixed', 'new', 'Wichita, KS', 'kubota-l2501.jpg', 'Brand new 25HP tractor with loader. 0 hours. Financing available.', 'Kubota', 'L2501', 'Compact Tractor', 2023, 'Diesel', 2532, 3);
+            this.createListing('Horsch Joker 4 Cultivator', 8750.00, 'negotiable', 'used', 'Wichita, KS', 'horsch-joker4.jpg', '12ft working width. Excellent seedbed preparation tool.', 'Horsch', 'Joker 4', 'Cultivator', 2020, 'Tractor-Powered', 1800, 3);
+            this.createListing('New Holland H7250 Baler', 42200.00, 'fixed', 'used', 'Heartland Vineyards, MO', 'newholland-h7250.jpg', '2020 model square baler. Net wrap system. Only 1500 bales made.', 'New Holland', 'H7250', 'Square Baler', 2020, 'Hydraulic', 4200, 5);
+    
+        } catch (err) {
+            console.error("Error inserting initial values:", err.message);
+        }
     }
 
     addUser(username, email, password, full_name, phone, location) {
-        // console.log("TODO: Implement password hashing here.");
-        let password_hash = password; // Placeholder 
         if (!this.#usernameRegex.test(username)) {
             throw new Error("Invalid username. Must be 3-20 characters long and can only contain letters, numbers, and underscores.");
         }
         if (!this.#emailRegex.test(email)) {
             throw new Error("Invalid email format.");
         }
-        if (!this.#phoneRegex.test(phone)) {
+        /*if (!this.#phoneRegex.test(phone)) {
             throw new Error("Invalid phone number format. Expected format: (123) 456-7890");
-        }
-
-
+        }*/
+        console.log("Adding user:", username, email, full_name, phone, location, password);
+        // Insert the user 
         this.#db.run(
             `INSERT INTO users (username, email, password_hash, full_name, phone, location) 
             VALUES (?, ?, ?, ?, ?, ?)`,
-            [username, email, password_hash, full_name, phone, location],
+            [username, email, this.#hash(password,username), full_name, phone, location],
             (err) => {
                 if (err) {
                     console.error(err.message);
+                    return;
                 }
             }
         );
-        console.log("User added successfully.");
+    }
+
+    verifyUserByName(username, password) {
+        return new Promise((resolve, reject) => {
+            this.#db.get(
+                `SELECT id FROM users WHERE username = ? AND password_hash = ?`,
+                [username, this.#hash(password, username)],
+                (err, row) => {
+                    if (err) {
+                        console.error(err.message);
+                        reject(err); // Default to rejecting on error
+                    } else if (row) {
+                        console.log("User verified successfully.");
+                        resolve(true); // User verified successfully
+                    } else {
+                        console.log("Invalid username or password.");
+                        resolve(false); // User not verified
+                    }
+                }
+            );
+        });
+    }
+
+    getUsernameByEmail(email) {
+        return new Promise((resolve, reject) => {
+            this.#db.get(
+                `SELECT username FROM users WHERE email = ?`,
+                [email],
+                (err, row) => {
+                    if (err) {
+                        reject(err); // Reject the promise if there's an error
+                    } else if (row) {
+                        resolve(row.username); // Resolve the promise with the username
+                    } else {
+                        resolve(null); // Resolve with null if no user is found
+                    }
+                }
+            );
+        });
+    }
+
+    verifyUserByEmail(email, password) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const username = await this.getUsernameByEmail(email);
+                if (!username) {
+                    console.log("User not found.");
+                    resolve(false); // Resolve with false if the user is not found
+                    return;
+                }
+    
+                this.#db.get(
+                    `SELECT id FROM users WHERE email = ? AND password_hash = ?`,
+                    [email, this.#hash(password, username)],
+                    (err, row) => {
+                        if (err) {
+                            console.error(err.message);
+                            reject(err); // Default to rejecting on error
+                        } else if (row) {
+                            console.log("User verified successfully.");
+                            resolve(true); // User verified successfully
+                        } else {
+                            console.log("Invalid username or password.");
+                            resolve(false); // User not verified
+                        }
+                    }
+                );
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 
     createListing(

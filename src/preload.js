@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('database', {
         make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, 
         user_id
     ),
-
+    verifyUserByEmail: (email, password)=> ipcRenderer.invoke('verify-user-email', email, password),
+    verifyUserByName: (username, password)=> ipcRenderer.invoke('verify-user-name', username, password),
 });
