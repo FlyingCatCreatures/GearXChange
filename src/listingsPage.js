@@ -60,13 +60,12 @@ async function fetchData() {
                             <p><strong>Condition:</strong> ${listing.listing_condition}</p>
                             <p><strong>Location:</strong> ${listing.listing_location}</p>
                             <p><strong>Description:</strong> ${listing.listing_description}</p>
-                            <h4>Product Details:</h4>
-                                <p><strong>Make:</strong> ${listing.product_make}</p>
-                                <p><strong>Model:</strong> ${listing.product_model}</p>
-                                <p><strong>Vehicle Type:</strong> ${listing.product_vehicle_type}</p>
-                                <p><strong>Year of Manufacture:</strong> ${listing.product_year}</p>
-                                <p><strong>Fuel/Power:</strong> ${listing.product_fuel}</p>
-                                <p><strong>Weight:</strong> ${listing.product_weight} kg</p>
+                            <p><strong>Make:</strong> ${listing.product_make}</p>
+                            <p><strong>Model:</strong> ${listing.product_model}</p>
+                            <p><strong>Vehicle Type:</strong> ${listing.product_vehicle_type}</p>
+                            <p><strong>Year of Manufacture:</strong> ${listing.product_year}</p>
+                            <p><strong>Fuel/Power:</strong> ${listing.product_fuel}</p>
+                            <p><strong>Weight:</strong> ${listing.product_weight} kg</p>
                         </div>
                     `;
                 });

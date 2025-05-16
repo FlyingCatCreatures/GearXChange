@@ -8,10 +8,10 @@ class Database {
     // If you find a better one you can test it at https://jsfiddle.net/kuo1vzg9/ against some emails
     // Note that it should fail when the 'multiple' attribute is set, as something like "a@p.com,b@p.com" is not a valid email
     #emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/; 
-    #phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/; // Format: (123) 456-7890
+    #phoneRegex = /^(?:\d{2}-|\d{3}-|\d{2}|\d{3})?\d{8}$/; 
 
     constructor(file) {
-        this.db = new sqlite3.Database(file);
+        this.#db = new sqlite3.Database(file);
 
         // Currently, we're using a database in memmory not a file, so nothing is saved
         // Therefore the database has to be recreated every time the app is started
@@ -19,16 +19,11 @@ class Database {
         this.#insertValues();
     }
 
-    constructor(file) {
-        this.db = new sqlite3.Database(file);
-        this.#createTables();
-        this.#insertValues();
-    }
 
     #createTables() {
-        this.db.serialize(() => {
+        this.#db.serialize(() => {
             // Main table of all available listings
-            this.db.run(
+            this.#db.run(
                 `CREATE TABLE machinery_listings (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT NOT NULL,
@@ -49,7 +44,7 @@ class Database {
             );
 
             // Table of user accounts
-            this.db.run(
+            this.#db.run(
                 `CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE,
@@ -67,9 +62,9 @@ class Database {
     }
 
     #insertValues() {
-        this.db.serialize(() => {
+        this.#db.serialize(() => {
             // Initialize listings with merged product details
-            this.db.run(
+            this.#db.run(
                 `INSERT INTO 
                 machinery_listings (title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id)
                 VALUES 
@@ -83,7 +78,7 @@ class Database {
             );
 
             // Initialize users
-            this.db.run(
+            this.#db.run(
                 `INSERT INTO 
                 users (id, username, email, password_hash, full_name, phone, location)
                 VALUES 
@@ -99,7 +94,9 @@ class Database {
         });
     }
 
-    addUser(username, email, password_hash, full_name, phone, location) {
+    addUser(username, email, password, full_name, phone, location) {
+        // console.log("TODO: Implement password hashing here.");
+        let password_hash = password; // Placeholder 
         if (!this.#usernameRegex.test(username)) {
             throw new Error("Invalid username. Must be 3-20 characters long and can only contain letters, numbers, and underscores.");
         }
@@ -109,7 +106,9 @@ class Database {
         if (!this.#phoneRegex.test(phone)) {
             throw new Error("Invalid phone number format. Expected format: (123) 456-7890");
         }
-        this.db.run(
+
+
+        this.#db.run(
             `INSERT INTO users (username, email, password_hash, full_name, phone, location) 
             VALUES (?, ?, ?, ?, ?, ?)`,
             [username, email, password_hash, full_name, phone, location],
@@ -119,6 +118,7 @@ class Database {
                 }
             }
         );
+        console.log("User added successfully.");
     }
 
     createListing(
@@ -128,7 +128,7 @@ class Database {
     ) {
         // Just like addUser, this is ran as a parameterised query by using the ? placeholders
         // This prevents SQL injection attacks
-        this.db.run(
+        this.#db.run(
             `INSERT INTO machinery_listings (title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id],
@@ -142,7 +142,7 @@ class Database {
 
      //DANGEROUS! JUST FOR TESTING
      all(query, callback) {
-        this.db.all(query, callback);
+        this.#db.all(query, callback);
     }
 }
 
