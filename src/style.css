@@ -232,3 +232,9 @@ min-height: 100vh;
 #login-form button:hover {
     background-color: #45a049;
 }
+
+#user-display {
+    color: white;
+    font-weight: bold;
+    text-align: right;
+}

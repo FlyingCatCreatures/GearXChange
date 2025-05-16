@@ -44,6 +44,10 @@ async function fetchData() {
             }
         });
 
+        // Get logged in user ID
+        // null for not logged in
+        const loggedInUserId = await window.database.getLoggedInUserId();
+
         // Render users and their listings
         usersMap.forEach((userData, userId) => {
             const userSection = document.createElement('div');
@@ -72,7 +76,7 @@ async function fetchData() {
             }
             userSection.innerHTML = `
                 <h2>User: ${userData.name} (${userData.email})</h2>
-                <button class="add-listing-button" data-user-id="${userId}">Add Listing</button>
+                ${userId === loggedInUserId ? '<button class="add-listing-button" data-user-id="${userId}">Add Listing</button>' : ''}
                 ${listings.length > 0 ? '<button class="toggle-button">Show Listings</button>' : ''}
                 ${listings.length > 0 ? 
                 `<div class="listings-container"}">
@@ -95,13 +99,12 @@ function bindAddListingButtons() {
     const addListingButtons = document.querySelectorAll('.add-listing-button');
     addListingButtons.forEach(button => {
         button.addEventListener('click', () => {
-            const userId = button.getAttribute('data-user-id');
-            showAddListingForm(userId);
+            showAddListingForm();
         });
     });
 }
 
-function showAddListingForm(userId) {
+function showAddListingForm() {
     const formHTML = `
         <div class="add-listing-form">
             <h3>Add Listing</h3>
@@ -168,7 +171,6 @@ function showAddListingForm(userId) {
 
         const formData = new FormData(form);
         const listingData = Object.fromEntries(formData.entries());
-        listingData.user_id = userId;
 
         try {
             await window.database.addListing(
@@ -184,8 +186,7 @@ function showAddListingForm(userId) {
                 listingData.vehicle_type,
                 parseInt(listingData.year_of_manufacture),
                 listingData.fuel_or_power,
-                parseFloat(listingData.weight),
-                parseInt(listingData.user_id)
+                parseFloat(listingData.weight)
             );
             alert('Listing added successfully!');
             fetchData(); // Refresh the listings
@@ -194,7 +195,7 @@ function showAddListingForm(userId) {
             alert('Failed to add listing. Check the console for details.');
         }
 
-        fetchData(); // Refresh the to include the new one
+        fetchData(); // Refresh the to include the new listing
     });
 }
 

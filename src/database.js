@@ -112,27 +112,6 @@ class Database {
         );
     }
 
-    verifyUserByName(username, password) {
-        return new Promise((resolve, reject) => {
-            this.#db.get(
-                `SELECT id FROM users WHERE username = ? AND password_hash = ?`,
-                [username, this.#hash(password, username)],
-                (err, row) => {
-                    if (err) {
-                        console.error(err.message);
-                        reject(err); // Default to rejecting on error
-                    } else if (row) {
-                        console.log("User verified successfully.");
-                        resolve(true); // User verified successfully
-                    } else {
-                        console.log("Invalid username or password.");
-                        resolve(false); // User not verified
-                    }
-                }
-            );
-        });
-    }
-
     getUsernameByEmail(email) {
         return new Promise((resolve, reject) => {
             this.#db.get(
@@ -143,6 +122,24 @@ class Database {
                         reject(err); // Reject the promise if there's an error
                     } else if (row) {
                         resolve(row.username); // Resolve the promise with the username
+                    } else {
+                        resolve(null); // Resolve with null if no user is found
+                    }
+                }
+            );
+        });
+    }
+
+    getIdByUsername(username) {
+        return new Promise((resolve, reject) => {
+            this.#db.get(
+                `SELECT id FROM users WHERE username = ?`,
+                [username],
+                (err, row) => {
+                    if (err) {
+                        reject(err); // Reject the promise if there's an error
+                    } else if (row) {
+                        resolve(row.id); // Resolve the promise with the username
                     } else {
                         resolve(null); // Resolve with null if no user is found
                     }
@@ -183,6 +180,27 @@ class Database {
         });
     }
 
+    verifyUserByName(username, password) {
+        return new Promise((resolve, reject) => {
+            this.#db.get(
+                `SELECT id FROM users WHERE username = ? AND password_hash = ?`,
+                [username, this.#hash(password, username)],
+                (err, row) => {
+                    if (err) {
+                        console.error(err.message);
+                        reject(err); // Default to rejecting on error
+                    } else if (row) {
+                        console.log("User verified successfully.");
+                        resolve(true); // User verified successfully
+                    } else {
+                        console.log("Invalid username or password.");
+                        resolve(false); // User not verified
+                    }
+                }
+            );
+        });
+    }
+
     createListing(
         title, price, price_type, condition, location, picture_url, description, 
         make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, 
@@ -202,7 +220,9 @@ class Database {
         );
     }
 
-     //DANGEROUS! JUST FOR TESTING
+     // DANGEROUS! JUST FOR TESTING
+     // Currently still used in the following cases that should be replaced with a better solution in due time:
+        // 1. In listingsPage.js to get all listings
      all(query, callback) {
         this.#db.all(query, callback);
     }

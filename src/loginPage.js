@@ -16,8 +16,8 @@ function handleLoginForm() {
                 console.log("User verified:", isVerified);
                 if (isVerified) {
                     alert("Login successful!");
-                    // TODO: implement actually having logged in
-                    // For now, we just navigate to the home page
+                    const userDisplay = document.getElementById("user-display");
+                    userDisplay.textContent = `Logged in as ${username}`;
                     navigate('Home');
                 } else {
                     console.log("Invalid username or password.");

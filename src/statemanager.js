@@ -96,6 +96,7 @@ function navigate(state) {
     });
 }
 
+// Event listeners fo the navbar items to call the navigate function and appropriate dynamic handlers
 navbarItems.forEach(item => {
     item.addEventListener('click', (event) => {
         event.preventDefault();
@@ -111,4 +112,27 @@ navbarItems.forEach(item => {
         }
         
     });
+});
+
+// Event listener for the loggged in user display
+document.addEventListener("DOMContentLoaded", async () => {
+    const userDisplay = document.getElementById("user-display");
+
+    try {
+        const loggedInUserId = await window.database.getLoggedInUserId();
+        if (loggedInUserId) {
+            const query = `SELECT full_name FROM users WHERE id = ${loggedInUserId}`;
+            const result = await window.database.query(query);
+            if (result && result[0]) {
+                userDisplay.textContent = `Logged in as: ${result[0].full_name}`;
+            } else {
+                userDisplay.textContent = "Not logged in";
+            }
+        } else {
+            userDisplay.textContent = "Not logged in";
+        }
+    } catch (error) {
+        console.error("Error fetching logged-in user:", error);
+        userDisplay.textContent = "Not logged in";
+    }
 });
