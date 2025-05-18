@@ -13,4 +13,9 @@ contextBridge.exposeInMainWorld('database', {
     verifyUserByEmail: (email, password)=> ipcRenderer.invoke('verify-user-email', email, password),
     verifyUserByName: (username, password)=> ipcRenderer.invoke('verify-user-name', username, password),
     getLoggedInUserId: ()=> ipcRenderer.invoke('get-logged-in-user-id'),
+
+});
+contextBridge.exposeInMainWorld('logger', {
+    log: (...msgs)=> ipcRenderer.invoke('log', msgs),
+    logError: (...msgs)=> ipcRenderer.invoke('log-error', msgs),
 });

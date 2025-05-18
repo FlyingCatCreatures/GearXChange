@@ -1,3 +1,5 @@
+log = (...msgs) => {window.logger.log(...msgs);};
+logError = (...msgs) => {window.logger.error(...msgs);};
 async function fetchData() {
     try {
         document.getElementById('main-body').innerHTML = '<p>Fetching data...</p>';
@@ -76,8 +78,8 @@ async function fetchData() {
             }
             userSection.innerHTML = `
                 <h2>User: ${userData.name} (${userData.email})</h2>
-                ${userId === loggedInUserId ? '<button class="add-listing-button" data-user-id="${userId}">Add Listing</button>' : ''}
-                ${listings.length > 0 ? '<button class="toggle-button">Show Listings</button>' : ''}
+                ${userId === loggedInUserId ? '<button class="add-listing-button secondary-button" data-user-id="${userId}">Add Listing</button>' : ''}
+                ${listings.length > 0 ? '<button class="toggle-button secondary-button">Show Listings</button>' : ''}
                 ${listings.length > 0 ? 
                 `<div class="listings-container"}">
                     ${listingsHTML}
@@ -90,8 +92,8 @@ async function fetchData() {
         bindAddListingButtons();
         bindToggleButtons();
     } catch (error) {
-        console.error('Error fetching data:', error);
-        document.getElementById('main-body').innerHTML = '<p>Error fetching data. Check the console for details.</p>';
+        logError('Error fetching or processing listing data:', error.message);
+        document.getElementById('main-body').innerHTML = '<p>Error fetching data. Check the log for details.</p>';
     }
 }
 
@@ -189,13 +191,18 @@ function showAddListingForm() {
                 parseFloat(listingData.weight)
             );
             alert('Listing added successfully!');
-            fetchData(); // Refresh the listings
+            log('Listing with title \"', listingData.title, '\" added successfully.');
+
+           
+            await fetchData(); // Refresh the page to include the new listing
+            bindToggleButtons(); // Rebind toggle buttons (this should be called in fetchData but it was bugging so idk)
+
         } catch (error) {
-            console.error('Error adding listing:', error);
-            alert('Failed to add listing. Check the console for details.');
+            logError('Error adding listing:', error);
+            alert('Failed to add listing. Check the log for details.');
         }
 
-        fetchData(); // Refresh the to include the new listing
+        await fetchData(); // Refresh the page to include the new listing
     });
 }
 

@@ -30,6 +30,8 @@ app.on('window-all-closed', () => app.quit());
 // The following code manages the IPC (inter process communication) between the main process and the renderer process
 // This is where we handle the events sent by preload.js
 // We use this to manage the database and the user's permission / login status
+// This also exposes the logger to the main process
+const logger = require('./logger');
 const db = require('./database');
 var user = {}
 const permissions = function(){
@@ -37,7 +39,6 @@ const permissions = function(){
     else if(user.isAdmin) return 'admin'; // Logged in as admin
     else return 'regular'; // Logged in as regular user
 }
-
 
 ipcMain.handle('run-query', async (event, query) => {
     /*if (permissions() != 'admin') 
@@ -97,7 +98,7 @@ ipcMain.handle('verify-user-name', async (event, username, password) => {
         }
         return result; 
     } catch (err) {
-        console.error("Error verifying user by name:", err.message);
+        logger.logError("Error verifying user", username, "by name:", err.message);
         return false; 
     }
 });
@@ -115,7 +116,7 @@ ipcMain.handle('verify-user-email', async (event, email, password) => {
         }
         return result; 
     } catch (err) {
-        console.error("Error verifying user by email:", err.message);
+        logger.logError("Error verifying user", username, "by email:", err.message);
         return false; 
     }
 });
@@ -128,3 +129,9 @@ ipcMain.handle('get-logged-in-user-id', async (event) => {
     }
 });
 
+ipcMain.handle('log', async (event, message) => {
+    logger.log(message);
+});
+ipcMain.handle('log-error', async (event, message) => {
+    logger.error(message);
+});

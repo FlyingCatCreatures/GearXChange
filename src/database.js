@@ -1,5 +1,9 @@
 const sqlite3 = require('sqlite3').verbose();
 const md5 = require('md5');
+const logger = require('./logger.js');
+const log = (...msgs) => {logger.log(...msgs);};
+const logError = (...msgs) => {logger.error(...msgs);};
+
 class Database {
     #db;
     #usernameRegex = /^[a-zA-Z0-9_]{3,20}$/; // Alphanumeric and underscores, 3-20 characters
@@ -57,8 +61,6 @@ class Database {
                     created_at TEXT NOT NULL DEFAULT (datetime('now'))
                 );`
             );
-
-            console.log("Created tables in database.");
         });
     }
 
@@ -83,7 +85,7 @@ class Database {
             this.createListing('New Holland H7250 Baler', 42200.00, 'fixed', 'used', 'Heartland Vineyards, MO', 'newholland-h7250.jpg', '2020 model square baler. Net wrap system. Only 1500 bales made.', 'New Holland', 'H7250', 'Square Baler', 2020, 'Hydraulic', 4200, 5);
     
         } catch (err) {
-            console.error("Error inserting initial values:", err.message);
+            logError("Error inserting initial values into database:", err.message);
         }
     }
 
@@ -94,10 +96,10 @@ class Database {
         if (!this.#emailRegex.test(email)) {
             throw new Error("Invalid email format.");
         }
-        /*if (!this.#phoneRegex.test(phone)) {
-            throw new Error("Invalid phone number format. Expected format: (123) 456-7890");
+        /*if (!this.#phoneRegex.test(phone)) { this is disabled for now because the phone number regex is wrong
+            throw new Error("Invalid phone number format.");
         }*/
-        console.log("Adding user:", username, email, full_name, phone, location, password);
+        log("Adding user:", username, email, full_name, phone, location, password);
         // Insert the user 
         this.#db.run(
             `INSERT INTO users (username, email, password_hash, full_name, phone, location) 
@@ -105,7 +107,7 @@ class Database {
             [username, email, this.#hash(password,username), full_name, phone, location],
             (err) => {
                 if (err) {
-                    console.error(err.message);
+                    logError("error adding user:", err.message);
                     return;
                 }
             }
@@ -153,7 +155,6 @@ class Database {
             try {
                 const username = await this.getUsernameByEmail(email);
                 if (!username) {
-                    console.log("User not found.");
                     resolve(false); // Resolve with false if the user is not found
                     return;
                 }
@@ -163,13 +164,13 @@ class Database {
                     [email, this.#hash(password, username)],
                     (err, row) => {
                         if (err) {
-                            console.error(err.message);
+                            logError("error verifying user by email:", err.message);
                             reject(err); // Default to rejecting on error
                         } else if (row) {
-                            console.log("User verified successfully.");
+                            log("User", username ,"verified successfully.");
                             resolve(true); // User verified successfully
                         } else {
-                            console.log("Invalid username or password.");
+                            log("Invalid login for user", username);
                             resolve(false); // User not verified
                         }
                     }
@@ -187,13 +188,13 @@ class Database {
                 [username, this.#hash(password, username)],
                 (err, row) => {
                     if (err) {
-                        console.error(err.message);
+                        logError("error verifying user by username:", err.message);
                         reject(err); // Default to rejecting on error
                     } else if (row) {
-                        console.log("User verified successfully.");
+                        log("User", username ,"verified successfully.");
                         resolve(true); // User verified successfully
                     } else {
-                        console.log("Invalid username or password.");
+                        log("Invalid login for user", username);
                         resolve(false); // User not verified
                     }
                 }
@@ -214,7 +215,7 @@ class Database {
             [title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id],
             (err) => {
                 if (err) {
-                    console.error("Error inserting into machinery_listings:", err.message);
+                    logError("Error inserting into machinery_listings:", err.message, "Listing:", title, price, price_type, condition, location, picture_url, description, make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight);
                 }
             }
         );

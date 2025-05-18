@@ -1,3 +1,5 @@
+log = (...msgs) => {window.logger.log(...msgs);};
+logError = (...msgs) => {window.logger.error(...msgs);};
 function handleLoginForm() {
     const loginForm = document.getElementById('login-form');
     const signupButton = document.getElementById('signup-button');
@@ -13,18 +15,17 @@ function handleLoginForm() {
                     await window.database.verifyUserByName(username, password) 
                     || 
                     await window.database.verifyUserByEmail(username, password);
-                console.log("User verified:", isVerified);
                 if (isVerified) {
                     alert("Login successful!");
                     const userDisplay = document.getElementById("user-display");
                     userDisplay.textContent = `Logged in as ${username}`;
                     navigate('Home');
                 } else {
-                    console.log("Invalid username or password.");
+                    log("Invalid login attempt for user:", username);
                     alert("Invalid username or password.");
                 }
             } catch (err) {
-                console.error("Error during login:", err.message);
+                logError("Error during login for user", username, ":", err.message);
                 alert("An error occurred during login. Please try again.");
             }
         });

@@ -2,6 +2,9 @@ const body = document.getElementById('main-body');
 const navbar = document.getElementById('navbar');
 const navbarItems = navbar.querySelectorAll('a');
 
+log = (...msgs) => {window.logger.log(...msgs);};
+logError = (...msgs) => {window.logger.error(...msgs);};
+
 let states = new Map(); 
 let currentState = 'Home';
 
@@ -132,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             userDisplay.textContent = "Not logged in";
         }
     } catch (error) {
-        console.error("Error fetching logged-in user:", error);
+        logError("Error fetching logged-in user:", error);
         userDisplay.textContent = "Not logged in";
     }
 });
