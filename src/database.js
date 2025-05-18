@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const md5 = require('md5');
+const sha256 = require('crypto').createHash('sha256');
 const logger = require('./logger.js');
 const log = (...msgs) => {logger.log(...msgs);};
 const logError = (...msgs) => {logger.error(...msgs);};
@@ -7,14 +7,13 @@ const logError = (...msgs) => {logger.error(...msgs);};
 class Database {
     #db;
     #usernameRegex = /^[a-zA-Z0-9_]{3,20}$/; // Alphanumeric and underscores, 3-20 characters
-
     // Best regex I could find for email validation
     // If you find a better one you can test it at https://jsfiddle.net/kuo1vzg9/ against some emails
     // Note that it should fail when the 'multiple' attribute is set, as something like "a@p.com,b@p.com" is not a valid email
     #emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/; 
     #phoneRegex = /^(?:\d{2}-|\d{3}-|\d{2}|\d{3})?\d{8}$/; 
     #random_salt = Math.floor(Math.random() * 500000)+500000; // Random salt for hashing
-    #hash = (password, username) => md5("gearXchange" + this.#random_salt + password + username); // Hash function with random salt and userspecific salt
+    #hash = (password, username) => sha256.update("gearXchange" + this.#random_salt + password + username, "binary").digest("hex"); // Hash function with random salt and userspecific salt
     
     constructor(file) {
         this.#db = new sqlite3.Database(file);

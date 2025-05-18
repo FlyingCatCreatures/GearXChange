@@ -79,7 +79,7 @@ states.set('News', `
     </div>
 `);
 
-states.set('Listings', `<p>Listings not loaded.</p>`);
+states.set('Listings', `<p>Listings not loaded.</p>`); // This is a placeholder, the actual listings will be loaded dynamically
 
 navigate('Home'); // Initialize the page with the Home state
 
