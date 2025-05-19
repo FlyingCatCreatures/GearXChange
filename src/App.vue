@@ -7,6 +7,8 @@
     <router-link to="/">Home</router-link>
     <router-link to="/about">About</router-link>
     <router-link to="/login">Login</router-link>
+    <span style="flex:1"></span>
+    <img src="@assets/account.svg" alt="Account" class="account-icon" style="height:24px; vertical-align:middle;" />
   </nav>
 
   <main>
@@ -20,6 +22,8 @@
   background-color: #1e1e1e;
   padding: 10px;
   color: white;
+  display: flex;
+  align-items: center;
 }
 
 .navbar a {
@@ -30,6 +34,10 @@
 
 .navbar a.router-link-active {
   font-weight: bold;
+}
+
+.account-icon {
+  filter: invert(1);
 }
 
 main {
