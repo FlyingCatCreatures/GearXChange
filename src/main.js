@@ -32,6 +32,8 @@ app.on('window-all-closed', () => app.quit());
 // We use this to manage the database and the user's permission / login status
 // This also exposes the logger to the main process
 const logger = require('./logger');
+const log = (...msgs) => {logger.log(...msgs);};
+const logError = (...msgs) => {logger.error(...msgs);};
 const db = require('./database');
 var user = {}
 const permissions = function(){
@@ -98,7 +100,7 @@ ipcMain.handle('verify-user-name', async (event, username, password) => {
         }
         return result; 
     } catch (err) {
-        logger.logError("Error verifying user", username, "by name:", err.message);
+        logError("Error verifying user", username, "by name:", err.message);
         return false; 
     }
 });
@@ -116,7 +118,7 @@ ipcMain.handle('verify-user-email', async (event, email, password) => {
         }
         return result; 
     } catch (err) {
-        logger.logError("Error verifying user", username, "by email:", err.message);
+        logError("Error verifying user", username, "by email:", err.message);
         return false; 
     }
 });
@@ -130,8 +132,8 @@ ipcMain.handle('get-logged-in-user-id', async (event) => {
 });
 
 ipcMain.handle('log', async (event, message) => {
-    logger.log(message);
+    log(message);
 });
 ipcMain.handle('log-error', async (event, message) => {
-    logger.error(message);
+    error(message);
 });
