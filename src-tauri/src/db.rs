@@ -206,6 +206,7 @@ pub async fn add_user(
     phone: &str,
     location: &str,
 ) -> Result<(), String> {
+    println!("Adding user: {} {} {} {} {} {}", username, email, password, full_name, phone, location);
     let pool = connect().await?;
 
     // Hash the password

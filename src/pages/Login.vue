@@ -1,20 +1,28 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/core";
 
 const username = ref('');
 const password = ref('');
 const loginMsg = ref('');
+const router = useRouter();
 
 async function handleLogin() {
     // the cast to boolean is not strictly necessary but it allows ts to infer the type
     // this invoke already returns a boolean so that's why it's not strictly necessary
     // but it makes the code clearer
-    let verified = Boolean(await invoke('verify_user', { username: username.value, password: password.value })); 
+    let verified = Boolean(await invoke('verify_user', { username: username.value.trim(), password: password.value.trim() })); //TODO: instead of trimming just limit the input box
 
     loginMsg.value = Boolean(verified) ? `Logged in successfully as ${username.value}` : "Login failed. Please check your credentials."; 
 }
+
+function goToSignUp() {
+  router.push('/signup');
+}
 </script>
+
+
 
 <template>
   <div class="login-outer">
@@ -31,6 +39,7 @@ async function handleLogin() {
         <button type="submit" class="login-form-button">Login</button>
       </form>
       <p>{{ loginMsg }}</p>
+    <button @click="goToSignUp" class="signup-button">Don't have an account? Sign Up</button>
     </div>
   </div>
 </template>
@@ -66,5 +75,18 @@ async function handleLogin() {
 .login-form-button {
   width: 100%;
   margin-top: 16px;
+}
+.signup-button {
+  margin-top: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+.signup-button:hover {
+  background-color: #0056b3;
 }
 </style>
