@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { invoke } from "@tauri-apps/api/core";
 
 const username = ref('');
 const password = ref('');
+const loginMsg = ref('');
 
-function handleLogin() {
-  console.log('Username:', username.value);
-  console.log('Password:', password.value);
+async function handleLogin() {
+    // the cast to boolean is not strictly necessary but it allows ts to infer the type
+    // this invoke already returns a boolean so that's why it's not strictly necessary
+    // but it makes the code clearer
+    let verified = Boolean(await invoke('verify_user', { username: username.value, password: password.value })); 
+
+    loginMsg.value = Boolean(verified) ? `Logged in successfully as ${username.value}` : "Login failed. Please check your credentials."; 
 }
 </script>
 
@@ -24,6 +30,7 @@ function handleLogin() {
         </div>
         <button type="submit" class="login-form-button">Login</button>
       </form>
+      <p>{{ loginMsg }}</p>
     </div>
   </div>
 </template>
