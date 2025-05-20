@@ -1353,6 +1353,7 @@ dependencies = [
 name = "gearxchange"
 version = "0.1.0"
 dependencies = [
+ "once_cell",
  "serde",
  "serde_json",
  "sha2",

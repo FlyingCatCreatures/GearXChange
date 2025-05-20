@@ -8,7 +8,6 @@ const email = ref('');
 const password = ref('');
 const fullName = ref(''); 
 const phone = ref('');
-const location = ref('');
 const signUpMsg = ref('');
 const router = useRouter();
 
@@ -20,7 +19,6 @@ async function handleSignUp() {
       password: password.value.trim(), // and here too
       fullName: fullName.value.trim(), // But not here though
       phone: phone.value.trim(), // and here too
-      location: location.value.trim(), // But not here though
     });
 
     signUpMsg.value = "Account created successfully! Redirecting to login...";
@@ -55,10 +53,6 @@ async function handleSignUp() {
         <div class="signup-form-field">
           <label for="phone">Phone:</label><br />
           <input type="text" id="phone" v-model="phone" required />
-        </div>
-        <div class="signup-form-field">
-          <label for="location">Location:</label><br />
-          <input type="text" id="location" v-model="location" required />
         </div>
         <button type="submit" class="signup-form-button">Sign Up</button>
       </form>
@@ -96,7 +90,16 @@ async function handleSignUp() {
   box-sizing: border-box;
 }
 .signup-form-button {
-  width: 100%;
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
   margin-top: 16px;
+}
+.signup-form-button:hover {
+  background-color: #218838;
 }
 </style>

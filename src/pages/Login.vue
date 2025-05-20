@@ -36,10 +36,12 @@ function goToSignUp() {
           <label for="password">Password:</label><br />
           <input type="password" id="password" v-model="password" required />
         </div>
-        <button type="submit" class="login-form-button">Login</button>
+        <div class="login-buttons">
+          <button type="submit" class="login-form-button">Login</button>
+          <button @click="goToSignUp" type="button" class="signup-button">Sign Up</button>
+        </div>
       </form>
       <p>{{ loginMsg }}</p>
-    <button @click="goToSignUp" class="signup-button">Don't have an account? Sign Up</button>
     </div>
   </div>
 </template>
@@ -72,21 +74,33 @@ function goToSignUp() {
   width: 100%;
   box-sizing: border-box;
 }
-.login-form-button {
-  width: 100%;
+.login-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
   margin-top: 16px;
 }
+.login-form-button,
 .signup-button {
-  margin-top: 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
+  flex: 1;
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
-  width: 100%;
+}
+.login-form-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+.signup-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
 }
 .signup-button:hover {
+  background-color: #218838;
+}
+.login-form-button:hover {
   background-color: #0056b3;
 }
 </style>

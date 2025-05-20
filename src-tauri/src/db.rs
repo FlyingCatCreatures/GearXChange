@@ -1,7 +1,10 @@
-use sqlx::{sqlite::SqlitePool, Executor};
-use tauri::command;
-use sha2::{Digest, Sha256};
+use sqlx::{sqlite::SqlitePool, Executor}; // For interacting with database
+use tauri::command; // For interacting with frontend
+use sha2::{Digest, Sha256}; // For hashing passwords
 use std::fs;
+use tauri::AppHandle; // For passing along to the state manager in verify_user
+
+use crate::statemanager::set_user_state; // For file operations
 
 fn hash(salt: &str, password: &str, username: &str) -> String {
     let mut hasher = Sha256::new();
@@ -25,12 +28,12 @@ async fn connect() -> Result<SqlitePool, String> {
 
 async fn insert_initial_data() -> Result<(), String> {
     // Add users
-    add_user("john_doe", "john.doe@agritech.com", "password1", "John Doe", "(417) 555-0123", "Springfield, MO").await?;
-    add_user("sarah_smith", "sarah.smith@greenvalley.org", "password2", "Sarah Smith", "(620) 555-0456", "Green Valley Farm, KS").await?;
-    add_user("mike_chen", "mike.chen@premiumfarms.co", "password3", "Michael Chen", "(316) 555-0789", "Wichita, KS").await?;
-    add_user("em_jackson", "emily.j@sunnyacres.com", "password4", "Emily Jackson", "(785) 555-0248", "Sunny Acres Ranch, NE").await?;
-    add_user("carlos_m", "carlos.mendoza@vinyard.org", "password5", "Carlos Mendoza", "(913) 555-0999", "Heartland Vineyards, MO").await?;
-    add_user("linda_weber", "linda.weber@protonmail.com", "password6", "Linda Weber", "(314) 555-0333", "St. Louis, MO").await?;
+    add_user("john_doe", "john.doe@agritech.com", "password1", "John Doe", "(417) 555-0123").await?;
+    add_user("sarah_smith", "sarah.smith@greenvalley.org", "password2", "Sarah Smith", "(620) 555-0456").await?;
+    add_user("mike_chen", "mike.chen@premiumfarms.co", "password3", "Michael Chen", "(316) 555-0789").await?;
+    add_user("em_jackson", "emily.j@sunnyacres.com", "password4", "Emily Jackson", "(785) 555-0248").await?;
+    add_user("carlos_m", "carlos.mendoza@vinyard.org", "password5", "Carlos Mendoza", "(913) 555-0999").await?;
+    add_user("linda_weber", "linda.weber@protonmail.com", "password6", "Linda Weber", "(314) 555-0333").await?;
 
     // Add listings
     create_listing(
@@ -149,7 +152,6 @@ async fn insert_initial_data() -> Result<(), String> {
     Ok(())
 }
 
-
 #[command]
 pub async fn init() -> Result<(), String> {
     let pool = connect().await?;
@@ -163,7 +165,6 @@ pub async fn init() -> Result<(), String> {
             password_hash TEXT,
             full_name TEXT,
             phone TEXT,
-            location TEXT,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
     "#;
@@ -204,9 +205,8 @@ pub async fn add_user(
     password: &str,
     full_name: &str,
     phone: &str,
-    location: &str,
 ) -> Result<(), String> {
-    println!("Adding user: {} {} {} {} {} {}", username, email, password, full_name, phone, location);
+    println!("Adding user: {} {} {} {} {}", username, email, password, full_name, phone);
     let pool = connect().await?;
 
     // Hash the password
@@ -215,8 +215,8 @@ pub async fn add_user(
 
 
     let query = r#"
-        INSERT INTO users (username, email, password_hash, full_name, phone, location)
-        VALUES ($1, $2, $3, $4, $5, $6);
+        INSERT INTO users (username, email, password_hash, full_name, phone)
+        VALUES ($1, $2, $3, $4, $5);
     "#;
 
     sqlx::query(query)
@@ -225,7 +225,6 @@ pub async fn add_user(
         .bind(password_hash) // $3
         .bind(full_name) // $4
         .bind(phone) // $5
-        .bind(location) // $6
         .execute(&pool)
         .await
         .map_err(|e| e.to_string())?;
@@ -234,7 +233,7 @@ pub async fn add_user(
 }
 
 #[command]
-pub async fn verify_user(username: &str, password: &str) -> Result<bool, String> {
+pub async fn verify_user(username: &str, password: &str, app_handle: AppHandle,) -> Result<bool, String> {
     let pool = connect().await?;
 
     // Hash the password
@@ -265,6 +264,13 @@ pub async fn verify_user(username: &str, password: &str) -> Result<bool, String>
         .await
         .map_err(|e| e.to_string())?;   
 
+    let verified = count_email.0 > 0 || count_name.0 > 0;
+    let permissions: String = String::from("regular");
+    if verified {
+        if let Err(e) = set_user_state(username.to_string(), permissions, &app_handle) {
+            return Err(format!("Failed to set user state: {}", e));
+        }
+    }
     Ok(count_email.0 > 0 || count_name.0 > 0)
 }
 

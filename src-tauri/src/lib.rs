@@ -6,6 +6,7 @@ fn greet(name: &str) -> String {
 
 
 mod db;
+mod statemanager;
 use tauri::Manager;
 
 // We want to clean up the database on app close because we don't want a peristent database rn
@@ -33,7 +34,14 @@ pub fn run() {
     }
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, db::add_user, db::verify_user, db::create_listing])
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            db::add_user, 
+            db::verify_user, 
+            db::create_listing,
+            statemanager::get_user_state,
+            statemanager::log_out,
+    ])
         .on_window_event(|window, event| { // See the comment before cleanup_db() to see why this is necessary
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 // Block the window from closing immediately
