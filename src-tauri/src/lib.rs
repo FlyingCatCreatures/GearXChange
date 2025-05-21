@@ -39,6 +39,7 @@ pub fn run() {
             db::add_user, 
             db::verify_user, 
             db::create_listing,
+            db::view_listing,
             statemanager::get_user_state,
             statemanager::log_out,
     ])

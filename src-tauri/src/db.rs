@@ -1,10 +1,9 @@
 use sqlx::{sqlite::SqlitePool, Executor}; // For interacting with database
 use tauri::command; // For interacting with frontend
 use sha2::{Digest, Sha256}; // For hashing passwords
-use std::fs;
+use std::fs; // For file operations
 use tauri::AppHandle; // For passing along to the state manager in verify_user
 
-use crate::statemanager::set_user_state; // For file operations
 
 fn hash(salt: &str, password: &str, username: &str) -> String {
     let mut hasher = Sha256::new();
@@ -185,6 +184,7 @@ pub async fn init() -> Result<(), String> {
             year_of_manufacture INTEGER CHECK (year_of_manufacture >= 1800 AND year_of_manufacture <= 2025),
             fuel_or_power TEXT NOT NULL,
             weight REAL,
+            views INTEGER DEFAULT 0,
             user_id INTEGER
         );
     "#;
@@ -267,7 +267,7 @@ pub async fn verify_user(username: &str, password: &str, app_handle: AppHandle,)
     let verified = count_email.0 > 0 || count_name.0 > 0;
     let permissions: String = String::from("regular");
     if verified {
-        if let Err(e) = set_user_state(username.to_string(), permissions, &app_handle) {
+        if let Err(e) = crate::statemanager::set_user_state(username.to_string(), permissions, &app_handle) {
             return Err(format!("Failed to set user state: {}", e));
         }
     }
@@ -322,3 +322,23 @@ pub async fn create_listing(
     Ok(())
 }
 
+#[command]
+pub async fn view_listing(id: i16) -> Result<(), String> {
+    let pool = connect().await?;
+
+    let query = r#"
+        UPDATE machinery_listings
+        SET views = views + 1
+        WHERE id = $1;
+    "#;
+
+    let result = sqlx::query(query)
+        .bind(id) // $1
+        .execute(&pool)
+        .await;
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to update views for listing with id '{}': {}", id, e)),
+    }
+}
