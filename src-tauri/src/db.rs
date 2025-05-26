@@ -359,7 +359,7 @@ pub async fn get_listings(ordering: &str) -> Result<Vec<serde_json::Value>, Stri
     let query = format!(
         r#"
         SELECT id, title, price, price_type, condition, location, picture_url, description,
-               make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, views, user_id
+               make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, views, created_at, user_id
         FROM machinery_listings
         ORDER BY {};
         "#,
@@ -391,6 +391,7 @@ pub async fn get_listings(ordering: &str) -> Result<Vec<serde_json::Value>, Stri
                 "fuel_or_power": row.get::<String, _>("fuel_or_power"),
                 "weight": row.get::<Option<f64>, _>("weight"),
                 "views": row.get::<i64, _>("views"),
+                "created_at": row.get::<String, _>("created_at"),
                 "user_id": row.get::<i64, _>("user_id"),
             })
         })
