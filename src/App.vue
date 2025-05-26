@@ -43,13 +43,15 @@ async function logout() {
     <nav class="navbar">
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
+      <span v-if="userState.permission_level == 'none'">
       <router-link to="/login">Login</router-link>
+      </span>
       <span style="flex:1"></span>
       <div class="account-info">
         <img src="@assets/account.svg" alt="Account" class="account-icon" />
         <span v-if="userState.permission_level !== 'none'">
           Logged in as {{ userState.username }}
-          <button @click="logout">Logout</button>
+          <button @click="logout" class="logout">Logout</button>
         </span>
         <span v-else>Not logged in</span>
       </div>
@@ -94,6 +96,21 @@ async function logout() {
 
 main {
   padding: 20px;
+}
+
+.logout {
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.logout:hover {
+  background-color: white;
+  color: #1e1e1e;
 }
 </style>
 

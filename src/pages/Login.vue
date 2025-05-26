@@ -15,6 +15,7 @@ async function handleLogin() {
     let verified = Boolean(await invoke('verify_user', { username: username.value.trim(), password: password.value.trim() })); //TODO: instead of trimming just limit the input box
 
     loginMsg.value = Boolean(verified) ? `Logged in successfully as ${username.value}` : "Login failed. Please check your credentials."; 
+    router.push('/');
 }
 
 function goToSignUp() {
