@@ -1,4 +1,4 @@
-use sqlx::{sqlite::SqlitePool, Executor}; // For interacting with database
+use sqlx::{sqlite::SqlitePool, Executor, Row}; // For interacting with database
 use tauri::command; // For interacting with frontend
 use sha2::{Digest, Sha256}; // For hashing passwords
 use std::fs; // For file operations
@@ -185,7 +185,8 @@ pub async fn init() -> Result<(), String> {
             fuel_or_power TEXT NOT NULL,
             weight REAL,
             views INTEGER DEFAULT 0,
-            user_id INTEGER
+            user_id INTEGER,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
     "#;
 
@@ -342,3 +343,61 @@ pub async fn view_listing(id: i16) -> Result<(), String> {
         Err(e) => Err(format!("Failed to update views for listing with id '{}': {}", id, e)),
     }
 }
+
+#[command]
+pub async fn get_listings(ordering: &str) -> Result<Vec<serde_json::Value>, String> {
+    let pool = connect().await?;
+
+    let order_by_clause = match ordering {
+        "price_asc" => "price ASC",       // Order by lowest price
+        "price_desc" => "price DESC",     // Order by highest price
+        "date_desc" => "created_at DESC", // Order by most recently created
+        _ => "views DESC",                // Default: order by most viewed
+
+    };
+
+    let query = format!(
+        r#"
+        SELECT id, title, price, price_type, condition, location, picture_url, description,
+               make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, views, user_id
+        FROM machinery_listings
+        ORDER BY {};
+        "#,
+        order_by_clause
+    );
+
+    let rows = sqlx::query(&query)
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    
+    // Convert rows to JSON for easier frontend consumption
+    let listings: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|row| {
+            serde_json::json!({
+                "id": row.get::<i64, _>("id"),
+                "title": row.get::<String, _>("title"),
+                "price": row.get::<Option<f64>, _>("price"),
+                "price_type": row.get::<String, _>("price_type"),
+                "condition": row.get::<String, _>("condition"),
+                "location": row.get::<String, _>("location"),
+                "picture_url": row.get::<Option<String>, _>("picture_url"),
+                "description": row.get::<Option<String>, _>("description"),
+                "make": row.get::<String, _>("make"),
+                "model": row.get::<String, _>("model"),
+                "vehicle_type": row.get::<String, _>("vehicle_type"),
+                "year_of_manufacture": row.get::<i32, _>("year_of_manufacture"),
+                "fuel_or_power": row.get::<String, _>("fuel_or_power"),
+                "weight": row.get::<Option<f64>, _>("weight"),
+                "views": row.get::<i64, _>("views"),
+                "user_id": row.get::<i64, _>("user_id"),
+            })
+        })
+        .collect();
+
+    Ok(listings)
+}
+
+
+

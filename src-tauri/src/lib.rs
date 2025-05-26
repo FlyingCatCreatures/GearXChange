@@ -40,6 +40,7 @@ pub fn run() {
             db::verify_user, 
             db::create_listing,
             db::view_listing,
+            db::get_listings,
             statemanager::get_user_state,
             statemanager::log_out,
     ])

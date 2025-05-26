@@ -5,7 +5,11 @@ import { invoke } from "@tauri-apps/api/core";
 
 const greetMsg = ref("");
 const name = ref("");
+const listings = ref("");
 
+async function getstuff() {
+  listings.value = await invoke("get_listings", { ordering: "" });
+}
 async function greet() {
   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
   greetMsg.value = await invoke("greet", { name: name.value });
@@ -34,6 +38,11 @@ async function greet() {
       <button type="submit">Greet</button>
     </form>
     <p>{{ greetMsg }}</p>
+    <form class="row" @submit.prevent="getstuff">
+      <input id="greet-input" v-model="name" placeholder="Enter a name..." />
+      <button type="submit">Get listings</button>
+    </form>
+    <p>{{ listings }}</p>
   </main>
 </template>
 
