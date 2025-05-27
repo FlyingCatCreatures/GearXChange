@@ -18,9 +18,6 @@ async function handleLogin() {
     router.push('/');
 }
 
-function goToSignUp() {
-  router.push('/signup');
-}
 </script>
 
 

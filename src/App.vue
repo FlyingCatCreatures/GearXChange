@@ -73,7 +73,7 @@ async function logout() {
         <div v-if="showDropdown" class="account-dropdown">
           <template v-if="userState.permission_level !== 'none'">
             <div class="dropdown-item"><b>{{ userState.username }}</b></div>
-            <router-link to="/profile" class="dropdown-item" >Profile</router-link>
+            <router-link to="/prof" class="dropdown-item" >Profile</router-link>
             <router-link to="/sett" class="dropdown-item" >Settings</router-link>
             <button @click="logout" class="dropdown-item">Logout</button>
           </template>
@@ -92,7 +92,7 @@ async function logout() {
 
 <style scoped>
 .navbar {
-  background-color: #1e1e1e;
+  background-color: #122532;
   padding: 10px;
   color: white;
   display: flex;
@@ -125,7 +125,7 @@ async function logout() {
   position: absolute;
   right: 10px;
   top: 48px;
-  background: #222;
+  background: #122532;
   color: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -154,7 +154,7 @@ async function logout() {
 }
 
 .dropdown-item:hover {
-  background: #444;
+  background: #193345;
 }
 
 .account-info {
@@ -208,7 +208,7 @@ main {
     -webkit-text-size-adjust: 100%;
   }
 
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
       color: #f6f6f6;
       background-color: #2f2f2f;
