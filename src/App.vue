@@ -64,13 +64,13 @@ async function logout() {
         </button>
         <div v-if="showDropdown" class="account-dropdown">
           <template v-if="userState.permission_level !== 'none'">
-            <div class="dropdown-item">Logged in as <b>{{ userState.username }}</b></div>
-            <router-link to="/profile" class="dropdown-item">Profile</router-link>
+            <div class="dropdown-item"><b>{{ userState.username }}</b></div>
+            <router-link to="/profile" class="dropdown-item hotfix" >Profile</router-link>
             <button @click="logout" class="dropdown-item">Logout</button>
           </template>
           <template v-else>
-            <router-link to="/login" class="dropdown-item">Login</router-link>
-            <router-link to="/signup" class="dropdown-item">Sign Up</router-link>
+            <router-link to="/login" class="dropdown-item hotfix">Login</router-link>
+            <router-link to="/signup" class="dropdown-item hotfix">Sign Up</router-link>
           </template>
         </div>
         <span v-if="userState.permission_level !== 'none'">
@@ -114,6 +114,9 @@ async function logout() {
   align-items: center;
 }
 
+.hotfix {
+    margin-left: 10px;
+}
 .account-dropdown {
   position: absolute;
   right: 10px;
@@ -126,19 +129,24 @@ async function logout() {
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
+  align-items: center;
+  justify-content: center; 
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .dropdown-item {
-  padding: 10px 20px;
+  padding: 10px 10px; 
   color: #fff;
-  text-align: left;
+  text-align: center;
   background: none;
   border: none;
-  width: 70%;
+  width: 100%;
   cursor: pointer;
   text-decoration: none;
   font-size: 1rem;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
 .dropdown-item:hover {
