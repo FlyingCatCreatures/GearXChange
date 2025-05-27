@@ -59,6 +59,9 @@ async function logout() {
       <router-link to="/about">About</router-link>
       <span style="flex:1"></span>
       <div class="account-info">
+        <span v-if="userState.permission_level !== 'none'">
+          {{ userState.username }}
+        </span>
         <button class="account-icon-btn" @click.stop="toggleDropdown" aria-label="Account menu">
           <img src="@assets/account.svg" alt="Account" class="account-icon" />
         </button>
@@ -73,10 +76,6 @@ async function logout() {
             <router-link to="/signup" class="dropdown-item hotfix">Sign Up</router-link>
           </template>
         </div>
-        <span v-if="userState.permission_level !== 'none'">
-          Logged in as {{ userState.username }}
-        </span>
-        <span v-else>Not logged in</span>
       </div>
     </nav>
     <main>
