@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 
 const userState = ref({ username: '', permission_level: 'none' });
+const showDropdown = ref(false);
 
 async function fetchUserState() {
   try {
@@ -14,17 +15,29 @@ async function fetchUserState() {
   }
 }
 
+function toggleDropdown() {
+  showDropdown.value = !showDropdown.value;
+}
+
+function closeDropdown(e: MouseEvent) {
+  const dropdown = document.querySelector('.account-dropdown');
+  const icon = document.querySelector('.account-icon-btn');
+  if (dropdown && icon && !dropdown.contains(e.target as Node) && !icon.contains(e.target as Node)) {
+    showDropdown.value = false;
+  }
+}
+
 onMounted(() => {
   fetchUserState();
-
+  document.addEventListener('click', closeDropdown);
   // Listen for backend updates
   const unlisten = listen('user-state-updated', (event) => {
     userState.value = event.payload as { username: string; permission_level: string };
   });
-
   // Cleanup listener on unmount
   onUnmounted(() => {
     unlisten.then((fn) => fn());
+    document.removeEventListener('click', closeDropdown);
   });
 });
 
@@ -32,6 +45,7 @@ async function logout() {
   try {
     await invoke('log_out');
     userState.value = { username: '', permission_level: 'none' };
+    showDropdown.value = false;
   } catch (error) {
     console.error('Failed to log out:', error);
   }
@@ -43,20 +57,28 @@ async function logout() {
     <nav class="navbar">
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
-      <span v-if="userState.permission_level == 'none'">
-      <router-link to="/login">Login</router-link>
-      </span>
       <span style="flex:1"></span>
       <div class="account-info">
-        <img src="@assets/account.svg" alt="Account" class="account-icon" />
+        <button class="account-icon-btn" @click.stop="toggleDropdown" aria-label="Account menu">
+          <img src="@assets/account.svg" alt="Account" class="account-icon" />
+        </button>
+        <div v-if="showDropdown" class="account-dropdown">
+          <template v-if="userState.permission_level !== 'none'">
+            <div class="dropdown-item">Logged in as <b>{{ userState.username }}</b></div>
+            <router-link to="/profile" class="dropdown-item">Profile</router-link>
+            <button @click="logout" class="dropdown-item">Logout</button>
+          </template>
+          <template v-else>
+            <router-link to="/login" class="dropdown-item">Login</router-link>
+            <router-link to="/signup" class="dropdown-item">Sign Up</router-link>
+          </template>
+        </div>
         <span v-if="userState.permission_level !== 'none'">
           Logged in as {{ userState.username }}
-          <button @click="logout" class="logout">Logout</button>
         </span>
         <span v-else>Not logged in</span>
       </div>
     </nav>
-
     <main>
       <router-view />
     </main>
@@ -82,7 +104,49 @@ async function logout() {
   font-weight: bold;
 }
 
+.account-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.account-dropdown {
+  position: absolute;
+  right: 10px;
+  top: 48px;
+  background: #222;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  min-width: 160px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  color: #fff;
+  text-align: left;
+  background: none;
+  border: none;
+  width: 70%;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.dropdown-item:hover {
+  background: #444;
+}
+
 .account-info {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;

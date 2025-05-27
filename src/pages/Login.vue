@@ -39,7 +39,6 @@ function goToSignUp() {
         </div>
         <div class="login-buttons">
           <button type="submit" class="login-form-button">Login</button>
-          <button @click="goToSignUp" type="button" class="signup-button">Sign Up</button>
         </div>
       </form>
       <p>{{ loginMsg }}</p>
