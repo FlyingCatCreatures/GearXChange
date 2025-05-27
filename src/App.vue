@@ -74,6 +74,7 @@ async function logout() {
           <template v-if="userState.permission_level !== 'none'">
             <div class="dropdown-item"><b>{{ userState.username }}</b></div>
             <router-link to="/profile" class="dropdown-item" >Profile</router-link>
+            <router-link to="/sett" class="dropdown-item" >Settings</router-link>
             <button @click="logout" class="dropdown-item">Logout</button>
           </template>
           <template v-else>

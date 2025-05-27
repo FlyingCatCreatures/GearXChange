@@ -15,6 +15,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/fav', component: UnImplemented },
   { path: '/hist', component: UnImplemented },
   { path: '/prof', component: UnImplemented },
+  { path: '/sett', component: UnImplemented },
 
 ]
 
