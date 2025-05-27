@@ -56,7 +56,12 @@ async function logout() {
   <div>
     <nav class="navbar">
       <router-link to="/">Home</router-link>
+      <router-link to="/sell">Sell product</router-link>
+      <router-link to="/rent">Rent product</router-link>
+      <router-link to="/fav">Favourites</router-link>
+      <router-link to="/hist">History</router-link>
       <router-link to="/about">About</router-link>
+
       <span style="flex:1"></span>
       <div class="account-info">
         <span v-if="userState.permission_level !== 'none'">
