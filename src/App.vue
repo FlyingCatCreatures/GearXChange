@@ -73,12 +73,12 @@ async function logout() {
         <div v-if="showDropdown" class="account-dropdown">
           <template v-if="userState.permission_level !== 'none'">
             <div class="dropdown-item"><b>{{ userState.username }}</b></div>
-            <router-link to="/profile" class="dropdown-item hotfix" >Profile</router-link>
+            <router-link to="/profile" class="dropdown-item" >Profile</router-link>
             <button @click="logout" class="dropdown-item">Logout</button>
           </template>
           <template v-else>
-            <router-link to="/login" class="dropdown-item hotfix">Login</router-link>
-            <router-link to="/signup" class="dropdown-item hotfix">Sign Up</router-link>
+            <router-link to="/login" class="dropdown-item">Login</router-link>
+            <router-link to="/signup" class="dropdown-item">Sign Up</router-link>
           </template>
         </div>
       </div>
@@ -95,13 +95,15 @@ async function logout() {
   padding: 10px;
   color: white;
   display: flex;
+  gap: 20px;
+  flex-direction : row;
   align-items: center;
 }
 
 .navbar a {
   color: white;
-  margin-right: 10px;
   text-decoration: none;
+
 }
 
 .navbar a.router-link-active {
@@ -118,9 +120,6 @@ async function logout() {
   align-items: center;
 }
 
-.hotfix {
-    margin-left: 10px;
-}
 .account-dropdown {
   position: absolute;
   right: 10px;
