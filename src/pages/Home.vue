@@ -1,21 +1,51 @@
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 
+<<<<<<< Updated upstream
 const greetMsg = ref("");
 const name = ref("");
+=======
+const listings = ref<any[]>([]);
+const loading = ref(true);
+const errorMsg = ref("");
 
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value });
+async function getListings() {
+  loading.value = true;
+  errorMsg.value = "";
+  try {
+    const rawListings = await invoke("get_listings", { ordering: "" });
+    if (Array.isArray(rawListings)) {
+      listings.value = rawListings;
+    } else {
+      listings.value = [];
+      errorMsg.value = "Unexpected data format from server.";
+    }
+  } catch (error) {
+    listings.value = [];
+    errorMsg.value = "Failed to fetch listings.";
+  } finally {
+    loading.value = false;
+  }
 }
+>>>>>>> Stashed changes
+
+onMounted(() => {
+  getListings();
+});
 </script>
 
 <template>
   <main class="container">
-    <h1>Welcome to Tauri + Vue</h1>
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>GearXChange</h1>
+      <p class="subtitle">Buy, sell, or rent heavy machinery with ease.</p>
+      <button class="cta" @click="getListings">Browse Latest Listings</button>
+    </section>
 
+<<<<<<< Updated upstream
     <div class="row">
       <a href="https://vite.dev" target="_blank">
         <img src="/vite.svg" class="logo vite" alt="Vite logo" />
@@ -35,6 +65,29 @@ async function greet() {
     </form>
     <p>{{ greetMsg }}</p>
  </main>
+=======
+    <!-- Featured Listings -->
+    <section class="featured-listings">
+      <h2>Featured Machinery</h2>
+      <div v-if="loading" class="loading">Loading listings...</div>
+      <div v-else-if="errorMsg" class="error">{{ errorMsg }}</div>
+      <div v-else>
+        <div v-if="listings.length > 0">
+          <ul class="listing-grid">
+            <li v-for="listing in listings.slice(0,9)" :key="listing.id" class="listing-card">
+              <h3>{{ listing.title }}</h3>
+              <p class="price">Price: <span>{{ listing.price || 'N/A' }}</span></p>
+              <p>Condition: <span>{{ listing.condition }}</span></p>
+              <p>Location: <span>{{ listing.location }}</span></p>
+              <p v-if="listing.description" class="desc">{{ listing.description }}</p>
+            </li>
+          </ul>
+        </div>
+        <p v-else>No listings available. Be the first to add your machine!</p>
+      </div>
+    </section>
+  </main>
+>>>>>>> Stashed changes
 </template>
 
 <style scoped>
@@ -46,92 +99,119 @@ async function greet() {
   filter: drop-shadow(0 0 2em #249b73);
 }
 
+
 .container {
-  margin: 0;
-  padding-top: 10vh;
+  margin: 0 auto;
+  max-width: 900px;
+  padding: 0 1rem 2rem 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
+}
+
+.hero {
   text-align: center;
+  margin-top: 6vh;
+  margin-bottom: 3rem;
 }
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
 }
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
+.subtitle {
+  font-size: 1.3rem;
+  color: #555;
+  margin-bottom: 1.5rem;
 }
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
+.cta {
+  background: #24c8db;
+  color: #fff;
+  border: none;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
+  padding: 0.8em 2em;
+  font-size: 1.1em;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+}
+.cta:hover {
+  background: #1ba7b8;
 }
 
-button:hover {
-  border-color: #396cd8;
+.featured-listings {
+  width: 100%;
+  margin-top: 2rem;
 }
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+.featured-listings h2 {
+  text-align: left;
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
-
-input,
-button {
-  outline: none;
+.loading {
+  text-align: center;
+  color: #888;
+  margin: 2rem 0;
 }
-
-#greet-input {
-  margin-right: 5px;
+.error {
+  color: #c00;
+  text-align: center;
+  margin: 2rem 0;
+}
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+}
+.listing-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 1.2rem 1.5rem;
+  text-align: left;
+  transition: box-shadow 0.2s;
+}
+.listing-card:hover {
+  box-shadow: 0 4px 16px rgba(36,200,219,0.13);
+}
+.listing-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.listing-card .price {
+  color: #24c8db;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+.listing-card .desc {
+  color: #444;
+  margin-top: 0.7rem;
+  font-size: 0.97em;
+}
+.listing-card span {
+  font-weight: 500;
 }
 
 @media (prefers-color-scheme: dark) {
-  a:hover {
-    color: #24c8db;
+  html, body {
+    background: #181818;
   }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
+  .container {
+    color: #f2f2f2;
   }
-  button:active {
-    background-color: #0f0f0f69;
+  .listing-card {
+    background: #23272e;
+    color: #f2f2f2;
+  }
+  .cta {
+    background: #1ba7b8;
+    color: #fff;
+  }
+  .cta:hover {
+    background: #24c8db;
   }
 }
 
