@@ -28,12 +28,12 @@ async function handleLogin() {
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="login-form-field">
           <label for="username">Username:</label><br />
-          <input placeholder="Username" pattern="[a-zA-Z0-9_]{3,20}" type="text" id="username" v-model="username" required />
+          <input placeholder="Username" pattern="^[a-zA-Z0-9_]{3,20}$" type="text" id="username" v-model="username" required @input="username = username.replace(/[^a-zA-Z0-9_]/g, '')" />
           <!--                          alphanumeric of length 3-20 -->
         </div>
         <div class="login-form-field">
           <label for="password">Password:</label><br />
-          <input placeholder="Password" pattern="^[a-zA-Z0-9]{8,}$" type="password" id="password" v-model="password" required />
+          <input placeholder="Password" pattern="^[\S]{8,}$" type="password" id="password" v-model="password" required @input="password = password.replace(/\s/g, '')" />
           <!--                          alphanumeric of length 8 or more -->
         </div>
         <div class="login-buttons">
@@ -72,6 +72,18 @@ async function handleLogin() {
 .login-form input {
   width: 100%;
   box-sizing: border-box;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1.5px solid #24c8db;
+  font-size: 1em;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-form input:focus {
+  outline: none;
+  border-color: #1ba7b8;
+  box-shadow: 0 0 0 2px #24c8db33;
 }
 .login-buttons {
   display: flex;
