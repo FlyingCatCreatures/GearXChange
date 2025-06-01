@@ -208,6 +208,13 @@ main {
     -webkit-text-size-adjust: 100%;
   }
 
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear,
+  input[type="password"]::-webkit-credentials-auto-fill-button,
+  input[type="password"]::-webkit-input-password-reveal-button {
+    display: none !important;
+  }
+
   @media (prefers-color-scheme: dark) {
     :root {
       color: #f6f6f6;
