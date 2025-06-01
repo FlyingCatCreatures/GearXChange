@@ -41,6 +41,7 @@ pub fn run() {
             db::create_listing,
             db::view_listing,
             db::get_listings,
+            db::get_visited_listings,
             statemanager::get_user_state,
             statemanager::log_out,
     ])

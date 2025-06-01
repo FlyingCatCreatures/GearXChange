@@ -190,8 +190,20 @@ pub async fn init() -> Result<(), String> {
         );
     "#;
 
+    let create_visited_listings_table = r#"
+        CREATE TABLE IF NOT EXISTS visited_listings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            listing_id INTEGER NOT NULL,
+            visited_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (listing_id) REFERENCES machinery_listings(id)
+        );
+    "#;
+
     pool.execute(create_users_table).await.map_err(|e| e.to_string())?;
     pool.execute(create_listings_table).await.map_err(|e| e.to_string())?;
+    pool.execute(create_visited_listings_table).await.map_err(|e| e.to_string())?;
 
     // Insert dummy data for testing
     insert_initial_data().await.map_err(|e| e.to_string())?;
@@ -324,24 +336,56 @@ pub async fn create_listing(
 }
 
 #[command]
-pub async fn view_listing(id: i16) -> Result<(), String> {
+pub async fn view_listing(listing_id: i32) -> Result<(), String> {
     let pool = connect().await?;
 
-    let query = r#"
+    // Get the current user's username from the statemanager
+    let user_state = crate::statemanager::get_user_state();
+        // Update the views count
+    let update_query = r#"
         UPDATE machinery_listings
         SET views = views + 1
         WHERE id = $1;
     "#;
 
-    let result = sqlx::query(query)
-        .bind(id) // $1
+    sqlx::query(update_query)
+        .bind(listing_id) // $1
         .execute(&pool)
-        .await;
+        .await
+        .map_err(|e| e.to_string())?;
 
-    match result {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to update views for listing with id '{}': {}", id, e)),
+
+    if user_state.username.is_empty() {
+        return Ok(()); // If user is not logged in we cannot store their history.
     }
+
+    // Retrieve the user_id from the database
+    let query_user_id = r#"
+        SELECT id FROM users WHERE username = $1;
+    "#;
+
+    let user_id: i32 = sqlx::query_scalar(query_user_id)
+        .bind(user_state.username) // $1
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+
+
+    // Record the visit in the user's history
+    let query = r#"
+        INSERT INTO visited_listings (user_id, listing_id)
+        VALUES ($1, $2);
+    "#;
+
+    sqlx::query(query)
+        .bind(user_id) // $1
+        .bind(listing_id) // $2
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[command]
@@ -400,5 +444,66 @@ pub async fn get_listings(ordering: &str) -> Result<Vec<serde_json::Value>, Stri
     Ok(listings)
 }
 
+#[command]
+pub async fn get_visited_listings() -> Result<Vec<serde_json::Value>, String> {
+    let pool = connect().await?;
 
+    // Get the current user's username from the statemanager
+    let user_state = crate::statemanager::get_user_state();
+    if user_state.username.is_empty() {
+        return Ok(vec![]);
+    }
 
+    let user_id_query = r#"
+        SELECT id FROM users WHERE username = $1;
+    "#;
+
+    let user_id: i32 = sqlx::query_scalar(user_id_query)
+        .bind(user_state.username) // $1
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let query_visited_listings = r#"
+        SELECT ml.id, ml.title, ml.price, ml.price_type, ml.condition, ml.location, ml.picture_url,
+               ml.description, ml.make, ml.model, ml.vehicle_type, ml.year_of_manufacture,
+               ml.fuel_or_power, ml.weight, ml.views, ml.created_at, ml.user_id
+        FROM visited_listings vl
+        INNER JOIN machinery_listings ml ON vl.listing_id = ml.id
+        WHERE vl.user_id = $1
+        ORDER BY vl.visited_at DESC;
+    "#;
+
+    let rows = sqlx::query(query_visited_listings)
+        .bind(user_id) // $1
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let visited_listings: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|row| {
+            serde_json::json!({
+                "id": row.get::<i64, _>("id"),
+                "title": row.get::<String, _>("title"),
+                "price": row.get::<Option<f64>, _>("price"),
+                "price_type": row.get::<String, _>("price_type"),
+                "condition": row.get::<String, _>("condition"),
+                "location": row.get::<String, _>("location"),
+                "picture_url": row.get::<Option<String>, _>("picture_url"),
+                "description": row.get::<Option<String>, _>("description"),
+                "make": row.get::<String, _>("make"),
+                "model": row.get::<String, _>("model"),
+                "vehicle_type": row.get::<String, _>("vehicle_type"),
+                "year_of_manufacture": row.get::<i32, _>("year_of_manufacture"),
+                "fuel_or_power": row.get::<String, _>("fuel_or_power"),
+                "weight": row.get::<Option<f64>, _>("weight"),
+                "views": row.get::<i64, _>("views"),
+                "created_at": row.get::<String, _>("created_at"),
+                "user_id": row.get::<i64, _>("user_id"),
+            })
+        })
+        .collect();
+
+    Ok(visited_listings)
+}

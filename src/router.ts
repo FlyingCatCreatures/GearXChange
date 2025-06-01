@@ -4,6 +4,8 @@ import About from './pages/About.vue'
 import Login from './pages/Login.vue'
 import SignUp from './pages/SignUp.vue'
 import UnImplemented from './pages/UnImplemented.vue'
+import History from './pages/History.vue';
+import Rent from './pages/Rent.vue';
 
 const routes: RouteRecordRaw[] = [
   { path: '/', component: Home },
@@ -11,9 +13,9 @@ const routes: RouteRecordRaw[] = [
   { path: '/login', component: Login },
   { path: '/signup', component: SignUp },
   { path: '/sell', component: UnImplemented },
-  { path: '/rent', component: UnImplemented },
+  { path: '/rent', component: Rent },
   { path: '/fav', component: UnImplemented },
-  { path: '/hist', component: UnImplemented },
+  { path: '/hist', component: History },
   { path: '/prof', component: UnImplemented },
   { path: '/sett', component: UnImplemented },
 
