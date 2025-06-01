@@ -52,23 +52,6 @@ async function greet() {
       <button type="submit">Greet</button>
     </form>
     <p>{{ greetMsg }}</p>
-    <form class="row" @submit.prevent="getlistings">
-      <button type="submit">Get listings</button>
-    </form>
-    <div>   
-        <div v-if="listings.length > 0">
-        <h2>Listings:</h2>
-        <ul>
-            <li v-for="listing in listings" :key="listing.id">
-            <h3>{{ listing.title }}</h3>
-            <p>Price: {{ listing.price || "N/A" }}</p>
-            <p>Condition: {{ listing.condition }}</p>
-            <p>Location: {{ listing.location }}</p>
-            </li>
-        </ul>
-        </div>
-        <p v-else>No listings available.</p> 
-    </div>
  </main>
 </template>
 
