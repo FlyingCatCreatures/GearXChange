@@ -26,9 +26,7 @@ async function getListings() {
   }
 }
 
-onMounted(() => {
-  getListings();
-});
+onMounted(getListings);
 
 </script>
 

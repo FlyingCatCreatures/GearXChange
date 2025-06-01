@@ -31,9 +31,8 @@ async function viewListing(listingId: number) {
   }
 }
 
-onMounted(() => {
-  fetchListings();
-});
+onMounted(fetchListings)
+
 </script>
 
 <template>

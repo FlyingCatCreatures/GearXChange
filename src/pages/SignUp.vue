@@ -14,11 +14,11 @@ const router = useRouter();
 async function handleSignUp() {
   try {
     await invoke('add_user', {
-      username: username.value.trim(), //TODO: instead of trimming just limit the input box
-      email: email.value.trim(), // and here too
-      password: password.value.trim(), // and here too
-      fullName: fullName.value.trim(), // But not here though
-      phone: phone.value.trim(), // and here too
+      username: username.value.trim(), 
+      email: email.value.trim(), 
+      password: password.value.trim(),
+      fullName: fullName.value.trim(),
+      phone: phone.value.trim(), 
     });
 
     signUpMsg.value = "Account created successfully! Redirecting to login...";

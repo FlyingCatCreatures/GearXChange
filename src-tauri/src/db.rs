@@ -25,6 +25,56 @@ async fn connect() -> Result<SqlitePool, String> {
         .map_err(|e| e.to_string())
 }
 
+// Essentially the same as create_listing, but the user_id is passed in instead of being inferred
+// This is done so we can more easily insert dummy data, in actuality this wouldn't need to exist
+// But we need a sort of initialised database, so we need it for now
+async fn create_listing_override(
+    title: &str,
+    price: Option<f64>,
+    price_type: &str,
+    condition: &str,
+    location: &str,
+    picture_url: Option<&str>,
+    description: Option<&str>,
+    make: &str,
+    model: &str,
+    vehicle_type: &str,
+    year_of_manufacture: i32,
+    fuel_or_power: &str,
+    weight: Option<f64>,
+    user_id: i32, // TODO: Make user_id not a variable passed in, but infered from the logged in user (see statemanager.rs)
+) -> Result<(), String> {
+    let pool = connect().await?;
+
+    let query = r#"
+        INSERT INTO machinery_listings (
+            title, price, price_type, condition, location, picture_url, description,
+            make, model, vehicle_type, year_of_manufacture, fuel_or_power, weight, user_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);
+    "#;
+
+    sqlx::query(query)
+        .bind(title) // $1
+        .bind(price) // $2
+        .bind(price_type) // $3
+        .bind(condition) // $4
+        .bind(location) // $5
+        .bind(picture_url) // $6
+        .bind(description) // $7
+        .bind(make) // $8
+        .bind(model) // $9
+        .bind(vehicle_type) // $10
+        .bind(year_of_manufacture) // $11
+        .bind(fuel_or_power) // $12
+        .bind(weight) // $13
+        .bind(user_id) // $14
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 async fn insert_initial_data() -> Result<(), String> {
     // Add users
     add_user("john_doe", "john.doe@agritech.com", "password1", "John Doe", "(417) 555-0123").await?;
@@ -35,7 +85,7 @@ async fn insert_initial_data() -> Result<(), String> {
     add_user("linda_weber", "linda.weber@protonmail.com", "password6", "Linda Weber", "(314) 555-0333").await?;
 
     // Add listings
-    create_listing(
+    create_listing_override(
         "John Deere 5075E Tractor",
         Some(32500.00),
         "negotiable",
@@ -51,7 +101,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(5075.0),
         1,
     ).await?;
-    create_listing(
+    create_listing_override(
         "Bush Hog SQ720 Rotary Cutter",
         Some(2200.00),
         "fixed",
@@ -67,7 +117,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(1200.0),
         1,
     ).await?;
-    create_listing(
+    create_listing_override(
         "Krone 4x4 Round Baler",
         Some(18500.00),
         "negotiable",
@@ -83,7 +133,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(3500.0),
         1,
     ).await?;
-    create_listing(
+    create_listing_override(
         "Case IH 2206 Cotton Picker",
         Some(149999.00),
         "negotiable",
@@ -99,7 +149,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(18000.0),
         2,
     ).await?;
-    create_listing(
+    create_listing_override(
         "Kubota L2501 Compact Tractor",
         Some(19500.00),
         "fixed",
@@ -115,7 +165,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(2532.0),
         3,
     ).await?;
-    create_listing(
+    create_listing_override(
         "Horsch Joker 4 Cultivator",
         Some(8750.00),
         "negotiable",
@@ -131,7 +181,7 @@ async fn insert_initial_data() -> Result<(), String> {
         Some(1800.0),
         3,
     ).await?;
-    create_listing(
+    create_listing_override(
         "New Holland H7250 Baler",
         Some(42200.00),
         "fixed",
@@ -302,9 +352,20 @@ pub async fn create_listing(
     year_of_manufacture: i32,
     fuel_or_power: &str,
     weight: Option<f64>,
-    user_id: i32,
 ) -> Result<(), String> {
     let pool = connect().await?;
+
+    let user_state = crate::statemanager::get_user_state();
+    if user_state.username.is_empty() {
+        return Err(String::from("Cannot create listing if user is not logged in"));
+    }
+
+    let user_id: i32 = sqlx::query_scalar(r#"SELECT id FROM users WHERE username = $1;"#)
+        .bind(user_state.username) // $1
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
 
     let query = r#"
         INSERT INTO machinery_listings (

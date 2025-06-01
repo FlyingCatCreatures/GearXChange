@@ -18,10 +18,8 @@ async function fetchVisitedListings() {
     errorMessage.value = "Failed to load visited listings. Please try again later.";
   }
 }
+onMounted(fetchVisitedListings)
 
-onMounted(() => {
-  fetchVisitedListings();
-});
 </script>
 
 <template>
