@@ -28,11 +28,13 @@ async function handleLogin() {
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="login-form-field">
           <label for="username">Username:</label><br />
-          <input type="text" id="username" v-model="username" required />
+          <input placeholder="Username" pattern="[a-zA-Z0-9_]{3,20}" type="text" id="username" v-model="username" required />
+          <!--                          alphanumeric of length 3-20 -->
         </div>
         <div class="login-form-field">
           <label for="password">Password:</label><br />
-          <input type="password" id="password" v-model="password" required />
+          <input placeholder="Password" pattern="^[a-zA-Z0-9]{8,}$" type="password" id="password" v-model="password" required />
+          <!--                          alphanumeric of length 8 or more -->
         </div>
         <div class="login-buttons">
           <button type="submit" class="login-form-button">Login</button>

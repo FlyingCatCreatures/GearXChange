@@ -36,23 +36,25 @@ async function handleSignUp() {
       <form @submit.prevent="handleSignUp" class="signup-form">
         <div class="signup-form-field">
           <label for="username">Username:</label><br />
-          <input type="text" id="username" v-model="username" required />
+          <input placeholder="Username" pattern="[a-zA-Z0-9_]{3,20}" type="text" id="username" v-model="username" required />
+          <!--                          alphanumeric of length 3-20 -->
         </div>
         <div class="signup-form-field">
           <label for="email">Email:</label><br />
-          <input type="email" id="email" v-model="email" required />
+          <input placeholder="Email" type="email" id="email" v-model="email" required /> <!-- Email input type is automatically sanitised according to https://www.w3schools.com/html/html_form_input_types.asp -->
         </div>
         <div class="signup-form-field">
           <label for="password">Password:</label><br />
-          <input type="password" id="password" v-model="password" required />
-        </div>
+          <input placeholder="Password" pattern="^[a-zA-Z0-9]{8,}$" type="password" id="password" v-model="password" required />
+          <!--                          alphanumeric of length 8 or more -->        </div>
         <div class="signup-form-field">
           <label for="fullName">Full Name:</label><br />
-          <input type="text" id="fullName" v-model="fullName" required />
+          <input placeholder="Full Name" pattern="^([A-Z][a-z]+)(\s[A-Z][a-z]+)+$" type="text" id="fullName" v-model="fullName" required />
+          <!--                           a list of at least two names each starting with capital letters -->
         </div>
         <div class="signup-form-field">
           <label for="phone">Phone:</label><br />
-          <input type="text" id="phone" v-model="phone" required />
+          <input placeholder="Phone number" pattern="^\+?[0-9\s\-]{10,20}$" type="text" id="phone" v-model="phone" required />
         </div>
         <button type="submit" class="signup-form-button">Sign Up</button>
       </form>
