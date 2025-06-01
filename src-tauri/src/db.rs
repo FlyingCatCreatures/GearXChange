@@ -1,9 +1,9 @@
 use sqlx::{sqlite::SqlitePool, Executor, Row}; // For interacting with database
+use sqlx::Column; 
 use tauri::command; // For interacting with frontend
 use sha2::{Digest, Sha256}; // For hashing passwords
 use std::fs; // For file operations
 use tauri::AppHandle; // For passing along to the state manager in verify_user
-
 
 fn hash(salt: &str, password: &str, username: &str) -> String {
     let mut hasher = Sha256::new();
@@ -506,4 +506,57 @@ pub async fn get_visited_listings() -> Result<Vec<serde_json::Value>, String> {
         .collect();
 
     Ok(visited_listings)
+}
+
+
+// This is just a temporary exposed API to execute arbitrary queries for testing and development purposes
+#[command]
+pub async fn execute_query(query: &str) -> Result<Vec<serde_json::Value>, String> {
+    let pool = connect().await?;
+
+    // Execute the query and fetch all rows
+    let rows = sqlx::query(query)
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| format!("Failed to execute query: {}", e))?;
+
+    // Convert rows to JSON for easier frontend consumption
+    let results: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|row| {
+            let mut json_row = serde_json::Map::new();
+            for column in row.columns() {
+                let column_name = column.name();
+                // Try to get the value as a string, f64, or i64, or fallback to Null
+                let value: serde_json::Value = 
+                    if let Ok(val) = row.try_get::<Option<String>, _>(column_name) {
+                        match val {
+                            Some(v) => serde_json::Value::String(v),
+                            None => serde_json::Value::Null,
+                        }
+                    } else if let Ok(val) = row.try_get::<Option<f64>, _>(column_name) {
+                        match val {
+                            Some(v) => serde_json::Value::from(v),
+                            None => serde_json::Value::Null,
+                        }
+                    } else if let Ok(val) = row.try_get::<Option<i64>, _>(column_name) {
+                        match val {
+                            Some(v) => serde_json::Value::from(v),
+                            None => serde_json::Value::Null,
+                        }
+                    } else if let Ok(val) = row.try_get::<Option<i32>, _>(column_name) {
+                        match val {
+                            Some(v) => serde_json::Value::from(v),
+                            None => serde_json::Value::Null,
+                        }
+                    } else {
+                        serde_json::Value::Null
+                    };
+                json_row.insert(column_name.to_string(), value);
+            }
+            serde_json::Value::Object(json_row)
+        })
+        .collect();
+
+    Ok(results)
 }

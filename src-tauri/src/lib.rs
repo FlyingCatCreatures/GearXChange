@@ -42,6 +42,7 @@ pub fn run() {
             db::view_listing,
             db::get_listings,
             db::get_visited_listings,
+            db::execute_query, // This should eventually be removed
             statemanager::get_user_state,
             statemanager::log_out,
     ])
