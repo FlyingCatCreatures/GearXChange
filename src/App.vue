@@ -53,172 +53,64 @@ async function logout() {
 </script>
 
 <template>
-  <div>
-    <nav class="navbar">
-      <router-link to="/">Home</router-link>
-      <router-link to="/sell">Sell product</router-link>
-      <router-link to="/rent">Rent product</router-link>
-      <router-link to="/fav">Favourites</router-link>
-      <router-link to="/hist">History</router-link>
-      <router-link to="/about">About</router-link>
-
-      <span style="flex:1"></span>
-      <div class="account-info">
-        <span v-if="userState.permission_level !== 'none'">
-          {{ userState.username }}
-        </span>
-        <button class="account-icon-btn" @click.stop="toggleDropdown" aria-label="Account menu">
-          <img src="@assets/account.svg" alt="Account" class="account-icon" />
-        </button>
-        <div v-if="showDropdown" class="account-dropdown">
-          <template v-if="userState.permission_level !== 'none'">
-            <div class="dropdown-item"><b>{{ userState.username }}</b></div>
-            <router-link to="/prof" class="dropdown-item" >Profile</router-link>
-            <router-link to="/sett" class="dropdown-item" >Settings</router-link>
-            <button @click="logout" class="dropdown-item">Logout</button>
-          </template>
-          <template v-else>
-            <router-link to="/login" class="dropdown-item">Login</router-link>
-            <router-link to="/signup" class="dropdown-item">Sign Up</router-link>
-          </template>
+  <div class="navbar bg-base-100 shadow-sm">
+    <div class="flex-1">
+      <router-link
+        to="/"
+        class="btn text-xl"
+        :class="$route.path === '/' ? 'btn-primary' : 'btn-ghost'"
+      >Home</router-link>
+      <router-link
+        to="/sell"
+        class="btn text-xl"
+        :class="$route.path === '/sell' ? 'btn-primary' : 'btn-ghost'"
+      >Sell product</router-link>
+      <router-link
+        to="/rent"
+        class="btn text-xl"
+        :class="$route.path === '/rent' ? 'btn-primary' : 'btn-ghost'"
+      >Rent product</router-link>
+      <router-link
+        to="/fav"
+        class="btn text-xl"
+        :class="$route.path === '/fav' ? 'btn-primary' : 'btn-ghost'"
+      >Favourites</router-link>
+      <router-link
+        to="/hist"
+        class="btn text-xl"
+        :class="$route.path === '/hist' ? 'btn-primary' : 'btn-ghost'"
+      >History</router-link>
+      <router-link
+        to="/about"
+        class="btn text-xl"
+        :class="$route.path === '/about' ? 'btn-primary' : 'btn-ghost'"
+      >About</router-link>
+    </div>
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" class="btn btn-ghost btn-circle avatar">
+        <div class="w-10 rounded-full">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M16 7.992C16 3.58 12.416 0 8 0S0 3.58 0 7.992c0 2.43 1.104 4.62 2.832 6.09.016.016.032.016.032.032.144.112.288.224.448.336.08.048.144.111.224.175A7.98 7.98 0 0 0 8.016 16a7.98 7.98 0 0 0 4.48-1.375c.08-.048.144-.111.224-.16.144-.111.304-.223.448-.335.016-.016.032-.016.032-.032 1.696-1.487 2.8-3.676 2.8-6.106zm-8 7.001c-1.504 0-2.88-.48-4.016-1.279.016-.128.048-.255.08-.383a4.17 4.17 0 0 1 .416-.991c.176-.304.384-.576.64-.816.24-.24.528-.463.816-.639.304-.176.624-.304.976-.4A4.15 4.15 0 0 1 8 10.342a4.185 4.185 0 0 1 2.928 1.166c.368.368.656.8.864 1.295.112.288.192.592.24.911A7.03 7.03 0 0 1 8 14.993zm-2.448-7.4a2.49 2.49 0 0 1-.208-1.024c0-.351.064-.703.208-1.023.144-.32.336-.607.576-.847.24-.24.528-.431.848-.575.32-.144.672-.208 1.024-.208.368 0 .704.064 1.024.208.32.144.608.336.848.575.24.24.432.528.576.847.144.32.208.672.208 1.023 0 .368-.064.704-.208 1.023a2.84 2.84 0 0 1-.576.848 2.84 2.84 0 0 1-.848.575 2.715 2.715 0 0 1-2.064 0 2.84 2.84 0 0 1-.848-.575 2.526 2.526 0 0 1-.56-.848zm7.424 5.306c0-.032-.016-.048-.016-.08a5.22 5.22 0 0 0-.688-1.406 4.883 4.883 0 0 0-1.088-1.135 5.207 5.207 0 0 0-1.04-.608 2.82 2.82 0 0 0 .464-.383 4.2 4.2 0 0 0 .624-.784 3.624 3.624 0 0 0 .528-1.934 3.71 3.71 0 0 0-.288-1.47 3.799 3.799 0 0 0-.816-1.199 3.845 3.845 0 0 0-1.2-.8 3.72 3.72 0 0 0-1.472-.287 3.72 3.72 0 0 0-1.472.288 3.631 3.631 0 0 0-1.2.815 3.84 3.84 0 0 0-.8 1.199 3.71 3.71 0 0 0-.288 1.47c0 .352.048.688.144 1.007.096.336.224.64.4.927.16.288.384.544.624.784.144.144.304.271.48.383a5.12 5.12 0 0 0-1.04.624c-.416.32-.784.703-1.088 1.119a4.999 4.999 0 0 0-.688 1.406c-.016.032-.016.064-.016.08C1.776 11.636.992 9.91.992 7.992.992 4.14 4.144.991 8 .991s7.008 3.149 7.008 7.001a6.96 6.96 0 0 1-2.032 4.907z"/></svg>
         </div>
       </div>
-    </nav>
+      <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+        <template v-if="userState.permission_level !== 'none'">
+          <li><router-link to="/prof">Profile</router-link></li>
+          <li><router-link to="/sett">Settings</router-link></li>
+          <li><a @click="logout">Logout</a></li>
+        </template>
+        <template v-else>
+          <li><router-link to="/login">Login</router-link></li>
+          <li><router-link to="/signup">Sign Up</router-link></li>
+        </template>
+      </ul>
+    </div>
+  </div>
     <main>
       <router-view />
     </main>
-  </div>
 </template>
 
-<style scoped>
-.navbar {
-  background-color: #122532;
-  padding: 10px;
-  color: white;
-  display: flex;
-  gap: 20px;
-  flex-direction : row;
-  align-items: center;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
-
-}
-
-.navbar a.router-link-active {
-  font-weight: bold;
-}
-
-.account-icon-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.account-dropdown {
-  position: absolute;
-  right: 10px;
-  top: 48px;
-  background: #122532;
-  color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  min-width: 160px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; 
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-.dropdown-item {
-  padding: 10px 10px; 
-  color: #fff;
-  text-align: center;
-  background: none;
-  border: none;
-  width: 100%;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: 1rem;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-.dropdown-item:hover {
-  background: #193345;
-}
-
-.account-info {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.account-icon {
-  height: 24px;
-  vertical-align: middle;
-  filter: invert(1);
-}
-
-main {
-  padding: 20px;
-}
-
-.logout {
-  background-color: transparent;
-  border: 1px solid white;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.logout:hover {
-  background-color: white;
-  color: #1e1e1e;
-}
-</style>
-
 <style>
-
-  :root {
-    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-
-    color: #0f0f0f;
-    background-color: #f6f6f6;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  input[type="password"]::-ms-reveal,
-  input[type="password"]::-ms-clear,
-  input[type="password"]::-webkit-credentials-auto-fill-button,
-  input[type="password"]::-webkit-input-password-reveal-button {
-    display: none !important;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      color: #f6f6f6;
-      background-color: #2f2f2f;
-    }
-  }
+@import "tailwindcss";
+@plugin "daisyui";
 </style>

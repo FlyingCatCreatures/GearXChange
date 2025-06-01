@@ -30,34 +30,3 @@ const commitQuery = async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.query-box {
-  display: flex;
-  align-items: center;
-  margin: 1.5rem auto 0 auto;
-  max-width: 600px;
-  gap: 0.5rem;
-}
-.query-input {
-  flex: 1;
-  padding: 0.6em 1em;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  font-size: 1em;
-}
-.commit-btn {
-  background: #24c8db;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.6em 1.5em;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.commit-btn:hover {
-  background: #1ba7b8;
-}
-</style>

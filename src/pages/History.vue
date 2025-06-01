@@ -43,34 +43,3 @@ onMounted(fetchVisitedListings);
     </div>
   </div>
 </template>
-
-<style scoped>
-.history-page {
-  padding: 20px;
-}
-
-.error {
-  color: red;
-  font-weight: bold;
-}
-
-.listings {
-  list-style: none;
-  padding: 0;
-}
-
-.listing-item {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-}
-
-.listing-item h3 {
-  margin: 0 0 5px;
-}
-
-.listing-item p {
-  margin: 0;
-}
-</style>
