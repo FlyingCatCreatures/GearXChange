@@ -29,6 +29,19 @@ async function getListings() {
 onMounted(() => {
   getListings();
 });
+
+// For SQL query box
+const queryText = ref("");
+const commitQuery = async () => {
+  if (!queryText.value.trim()) return;
+  try {
+    await invoke("execute_query", { query: queryText.value });
+    // Optionally, you could show a notification or refresh listings, etc.
+  } catch (e) {
+    // Optionally, handle error
+    console.error(e);
+  }
+};
 </script>
 
 <template>
@@ -38,6 +51,16 @@ onMounted(() => {
       <h1>GearXChange</h1>
       <p class="subtitle">Buy, sell, or rent heavy machinery with ease.</p>
       <button class="cta" @click="getListings">Browse Latest Listings</button>
+      <!-- SQL Query Box for Development/Testing -->
+      <div class="query-box">
+        <input
+          v-model="queryText"
+          class="query-input"
+          type="text"
+          placeholder="Enter SQL query..."
+        />
+        <button class="commit-btn" @click="commitQuery">Commit</button>
+      </div>
     </section>
 
     <!-- Featured Listings -->
@@ -166,6 +189,35 @@ onMounted(() => {
 }
 .listing-card span {
   font-weight: 500;
+}
+
+.query-box {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem auto 0 auto;
+  max-width: 600px;
+  gap: 0.5rem;
+}
+.query-input {
+  flex: 1;
+  padding: 0.6em 1em;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 1em;
+}
+.commit-btn {
+  background: #24c8db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6em 1.5em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.commit-btn:hover {
+  background: #1ba7b8;
 }
 
 @media (prefers-color-scheme: dark) {
