@@ -8,6 +8,7 @@ fn greet(name: &str) -> String {
 mod db;
 mod statemanager;
 use tauri::Manager;
+use tauri_plugin_prevent_default::PlatformOptions;
 
 // We want to clean up the database on app close because we don't want a peristent database rn
 // It can't be done on startup because then vue notices a file has changed and rebuilds the app
@@ -34,6 +35,14 @@ pub fn run() {
     }
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+        tauri_plugin_prevent_default::Builder::new()
+            .platform(PlatformOptions {
+                general_autofill: false,
+                password_autosave: false,
+            })
+            .build()
+        )
         .invoke_handler(tauri::generate_handler![
             greet, 
             db::add_user, 
