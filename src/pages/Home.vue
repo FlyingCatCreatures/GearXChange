@@ -5,24 +5,6 @@ import { invoke } from "@tauri-apps/api/core";
 
 const greetMsg = ref("");
 const name = ref("");
-const listings = ref<any[]>([]); 
-
-async function getlistings() {
-  try {
-    const rawListings = await invoke("get_listings", { ordering: "" });
-    console.log("Raw Listings:", rawListings); // Debug the returned data
-    
-    if (Array.isArray(rawListings)) { // The IDE wants this check otherwise it can't infer the type of rawListings
-      listings.value = rawListings;
-    } else {
-      console.error("Unexpected data format:", rawListings);
-      listings.value = []; // Reset to an empty array on unexpected format
-    }
-  } catch (error) {
-    console.error("Failed to fetch listings:", error);
-    listings.value = []; // Reset to an empty array on error
-  }
-}
 
 async function greet() {
   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
