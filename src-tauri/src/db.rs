@@ -1,3 +1,5 @@
+// --- FAVOURITES FUNCTIONALITY ---
+use sqlx::sqlite::SqliteRow;
 use sqlx::{sqlite::SqlitePool, Executor, Row}; // For interacting with database
 use sqlx::Column; 
 use tauri::command; // For interacting with frontend
@@ -251,9 +253,23 @@ pub async fn init() -> Result<(), String> {
         );
     "#;
 
+
+    let create_favourites_table = r#"
+        CREATE TABLE IF NOT EXISTS favourite_listings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            listing_id INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(user_id, listing_id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (listing_id) REFERENCES machinery_listings(id)
+        );
+    "#;
+
     pool.execute(create_users_table).await.map_err(|e| e.to_string())?;
     pool.execute(create_listings_table).await.map_err(|e| e.to_string())?;
     pool.execute(create_visited_listings_table).await.map_err(|e| e.to_string())?;
+    pool.execute(create_favourites_table).await.map_err(|e| e.to_string())?;
 
     // Insert dummy data for testing
     insert_initial_data().await.map_err(|e| e.to_string())?;
@@ -573,6 +589,117 @@ pub async fn get_visited_listings() -> Result<Vec<serde_json::Value>, String> {
     Ok(visited_listings)
 }
 
+#[command]
+pub async fn add_favourite(listing_id: i32) -> Result<(), String> {
+    let pool = connect().await?;
+
+    // Get the current user's username from the statemanager
+    let user_state = crate::statemanager::get_user_state();
+    if user_state.username.is_empty() {
+        return Err("Cannot add favourite if user is not logged in".to_string());
+    }
+
+    // Retrieve the user_id from the database
+    let query_user_id = r#"SELECT id FROM users WHERE username = $1;"#;
+    let user_id: i32 = sqlx::query_scalar(query_user_id)
+        .bind(user_state.username)
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Insert into favourites table (ignore if already exists)
+    let query = r#"
+        INSERT OR IGNORE INTO favourite_listings (user_id, listing_id)
+        VALUES ($1, $2);
+    "#;
+    sqlx::query(query)
+        .bind(user_id)
+        .bind(listing_id)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[command]
+pub async fn remove_favourite(listing_id: i32) -> Result<(), String> {
+    let pool = connect().await?;
+    let user_state = crate::statemanager::get_user_state();
+    if user_state.username.is_empty() {
+        return Err("Cannot remove favourite if user is not logged in".to_string());
+    }
+    let query_user_id = r#"SELECT id FROM users WHERE username = $1;"#;
+    let user_id: i32 = sqlx::query_scalar(query_user_id)
+        .bind(user_state.username)
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let query = r#"
+        DELETE FROM favourite_listings WHERE user_id = $1 AND listing_id = $2;
+    "#;
+    sqlx::query(query)
+        .bind(user_id)
+        .bind(listing_id)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[command]
+pub async fn get_favourite_listings() -> Result<Vec<serde_json::Value>, String> {
+    let pool = connect().await?;
+    let user_state = crate::statemanager::get_user_state();
+    if user_state.username.is_empty() {
+        return Ok(vec![]);
+    }
+    let user_id_query = r#"SELECT id FROM users WHERE username = $1;"#;
+    let user_id: i32 = sqlx::query_scalar(user_id_query)
+        .bind(user_state.username)
+        .fetch_one(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let query_fav_listings = r#"
+        SELECT ml.id, ml.title, ml.price, ml.price_type, ml.condition, ml.location, ml.picture_url,
+               ml.description, ml.make, ml.model, ml.vehicle_type, ml.year_of_manufacture,
+               ml.fuel_or_power, ml.weight, ml.views, ml.created_at, ml.user_id
+        FROM favourite_listings fl
+        INNER JOIN machinery_listings ml ON fl.listing_id = ml.id
+        WHERE fl.user_id = $1
+        ORDER BY fl.rowid DESC;
+    "#;
+    let rows = sqlx::query(query_fav_listings)
+        .bind(user_id)
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let fav_listings: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|row| {
+            serde_json::json!({
+                "id": row.get::<i64, _>("id"),
+                "title": row.get::<String, _>("title"),
+                "price": row.get::<Option<f64>, _>("price"),
+                "price_type": row.get::<String, _>("price_type"),
+                "condition": row.get::<String, _>("condition"),
+                "location": row.get::<String, _>("location"),
+                "picture_url": row.get::<Option<String>, _>("picture_url"),
+                "description": row.get::<Option<String>, _>("description"),
+                "make": row.get::<String, _>("make"),
+                "model": row.get::<String, _>("model"),
+                "vehicle_type": row.get::<String, _>("vehicle_type"),
+                "year_of_manufacture": row.get::<i32, _>("year_of_manufacture"),
+                "fuel_or_power": row.get::<String, _>("fuel_or_power"),
+                "weight": row.get::<Option<f64>, _>("weight"),
+                "views": row.get::<i64, _>("views"),
+                "created_at": row.get::<String, _>("created_at"),
+                "user_id": row.get::<i64, _>("user_id"),
+            })
+        })
+        .collect();
+    Ok(fav_listings)
+}
 
 // This is just a temporary exposed API to execute arbitrary queries for testing and development purposes
 #[command]

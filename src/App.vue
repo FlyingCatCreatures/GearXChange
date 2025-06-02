@@ -58,7 +58,7 @@ async function logout() {
 </script>
 
 <template>
-  <div class="navbar bg-base-100 shadow-sm">
+  <div class="navbar bg-base-100 shadow-sm fixed top-0 left-0 w-full z-50">
     <div class="flex-1">
       <router-link
         to="/"
@@ -70,11 +70,6 @@ async function logout() {
         class="btn text-xl"
         :class="$route.path === '/sell' ? 'btn-primary' : 'btn-ghost'"
       >Sell product</router-link>
-      <router-link
-        to="/rent"
-        class="btn text-xl"
-        :class="$route.path === '/rent' ? 'btn-primary' : 'btn-ghost'"
-      >Rent product</router-link>
       <router-link
         to="/fav"
         class="btn text-xl"
@@ -136,6 +131,7 @@ async function logout() {
     </div>
   </div>
     <main>
+      <div class="min-h-16"></div>
       <router-view />
       <Login v-if="activeOverlay === 'Login'" @close="showOverlay('None'); fetchUserState" />
       <Signup v-if="activeOverlay === 'Signup'" @close="showOverlay('None')" @show-login="showOverlay('Login')"/>
