@@ -7,7 +7,6 @@ const price = ref<number | null>(null);
 const priceType = ref("fixed");
 const condition = ref("new");
 const location = ref("");
-const pictureUrl = ref("");
 const description = ref("");
 const make = ref("");
 const model = ref("");
@@ -15,7 +14,9 @@ const vehicleType = ref("");
 const yearOfManufacture = ref<number | null>(null);
 const fuelOrPower = ref("");
 const weight = ref<number | null>(null);
-
+const pictureFile = ref<File | null>(null);
+const pictureFileName = ref<string>("");
+const imagePreview = ref<string | null>(null);
 const stepTwo = ref(false);
 const plate = ref("");
 const workHours = ref<number | null>(null);
@@ -24,27 +25,49 @@ const successMessage = ref("");
 const errorMessage = ref("");
 
 function goToStep2() {
-  if (!plate.value.trim()) {
-    errorMessage.value = "Please fill in a plate number.";
+  const platePattern = /^[A-Z]{2}-[0-9]{3}-[A-Z]$/;
+  if (!platePattern.test(plate.value.trim())) {
+    errorMessage.value = "Please use format XX-999-X with a dash.";
     return;
   }
   if (workHours.value === null) {
-    errorMessage.value = "Please fill in the work hours.";
+    errorMessage.value = "Please enter the operating hours first.";
     return;
   }
   errorMessage.value = "";
   stepTwo.value = true;
 }
 
+function onFileChange(event: Event) {
+  const files = (event.target as HTMLInputElement).files;
+  if (files && files.length > 0) {
+    pictureFile.value = files[0];
+    pictureFileName.value = files[0].name;
+    imagePreview.value = URL.createObjectURL(files[0]);
+  } else {
+    pictureFile.value = null;
+    pictureFileName.value = "";
+    imagePreview.value = null;
+  }
+}
+
 async function handleCreateListing() {
   try {
+    // now just log file name, backend implementation needed
+    if (pictureFile.value) {
+      console.log("Uploaded file:", pictureFileName.value);
+    }
+    
     await invoke("create_listing", {
+      plate: plate.value.trim(),
+      work_hours: workHours.value,
       title: title.value.trim(),
       price: price.value,
       priceType: priceType.value,
       condition: condition.value,
       location: location.value.trim(),
-      pictureUrl: pictureUrl.value.trim() || null,
+      // Currently only sending file name, update if backend expects file data
+      picture: pictureFileName.value || null,
       description: description.value.trim() || null,
       make: make.value.trim(),
       model: model.value.trim(),
@@ -57,6 +80,7 @@ async function handleCreateListing() {
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";
     resetForm();
+    stepTwo.value = false;
   } catch (error) {
     console.error("Failed to create listing:", error);
     successMessage.value = "";
@@ -65,12 +89,13 @@ async function handleCreateListing() {
 }
 
 function resetForm() {
+  plate.value = "";
+  workHours.value = null;
   title.value = "";
   price.value = null;
   priceType.value = "fixed";
   condition.value = "new";
   location.value = "";
-  pictureUrl.value = "";
   description.value = "";
   make.value = "";
   model.value = "";
@@ -78,12 +103,15 @@ function resetForm() {
   yearOfManufacture.value = null;
   fuelOrPower.value = "";
   weight.value = null;
+
+  pictureFile.value = null;
+  pictureFileName.value = "";
+  imagePreview.value = null;
 }
 </script>
 
 <template>
   <div class="sell-page max-w-xl mx-auto p-6">
-    <!-- Fase 1: vraag om kenteken + werkuren -->
     <div v-if="!stepTwo" class="step1">
       <h1 class="text-2xl font-semibold mb-4">Fill in your license plate</h1>
       <div v-if="errorMessage" class="error text-red-600 mb-2">{{ errorMessage }}</div>
@@ -92,8 +120,10 @@ function resetForm() {
         <input
           id="plate"
           v-model="plate"
+          @input="plate = plate.toUpperCase()"
           type="text"
-          placeholder="X-999-XX"
+          maxlength="8"
+          placeholder="XX-999-X"
           class="input input-bordered w-full"
         />
       </div>
@@ -112,7 +142,7 @@ function resetForm() {
         @click="goToStep2"
         class="btn btn-primary"
       >
-        View product
+        Create listing
       </button>
     </div>
 
@@ -120,7 +150,7 @@ function resetForm() {
       <h1 class="text-2xl font-semibold mb-4">Create a New Listing</h1>
       <div class="mb-4">
         <span class="font-medium">License Plate:</span> {{ plate }}<br />
-        <span class="font-medium">License Plate:</span> {{ workHours }}
+        <span class="font-medium">Work Hours:</span> {{ workHours }} h
       </div>
       <div v-if="successMessage" class="success text-green-600 mb-2">{{ successMessage }}</div>
       <div v-if="errorMessage" class="error text-red-600 mb-2">{{ errorMessage }}</div>
@@ -184,13 +214,26 @@ function resetForm() {
             />
           </div>
         </div>
-        <div class="form-field">
-          <label for="pictureUrl" class="block font-medium mb-1">Picture URL:</label>
-          <input
-            id="pictureUrl"
-            v-model="pictureUrl"
-            type="text"
-            class="input input-bordered w-full"
+        <div class="form-field mb-4">
+          <label for="pictureFile" class="block font-medium mb-1">Upload Picture:</label>
+          <label class="btn btn-outline w-full cursor-pointer">
+            Choose File
+            <input
+              id="pictureFile"
+              type="file"
+              accept="image/*"
+              @change="onFileChange"
+              class="hidden"
+            />
+          </label>
+          <div v-if="pictureFileName" class="text-sm text-gray-500 mt-1">
+            Selected file: {{ pictureFileName }}
+          </div>
+          <img
+            v-if="imagePreview"
+            :src="imagePreview"
+            alt="Image Preview"
+            class="mt-4 max-h-48 w-auto border border-gray-300 rounded"
           />
         </div>
         <div class="form-field">
@@ -290,11 +333,3 @@ function resetForm() {
   </div>
 </template>
 
-<style scoped>
-.sell-page {
-  /* Centrale container, pas naar wens aan */
-}
-.form-field label {
-  display: block;
-}
-</style>
