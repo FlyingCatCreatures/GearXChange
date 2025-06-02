@@ -10,6 +10,7 @@ const fullName = ref('');
 const phone = ref('');
 const signUpMsg = ref('');
 const router = useRouter();
+const emit = defineEmits(['show-login', 'close']);
 
 const usernameRegex = ref(/^[a-zA-Z0-9_]{3,30}$/);                      // 3 to 30 characters, letters, numbers, or underscores
 const passwordRegex = ref(/^\S{8,}$/);                                  // At least 8 characters
@@ -27,7 +28,7 @@ async function handleSignUp() {
         phone: phone.value.trim(), 
         });
         signUpMsg.value = "Account created successfully! Redirecting to login...";
-        setTimeout(() => router.push('/login'), 2000);
+        setTimeout(() => emit('show-login'), 1000);
     } catch (error) {
         console.error("Error during sign up:", error);
         signUpMsg.value = "Sign up failed. Please try again.";
@@ -38,6 +39,8 @@ const showPassword = ref(false);
 function togglePassword() {
   showPassword.value = !showPassword.value;
 }
+
+
 </script>
 
 <template>

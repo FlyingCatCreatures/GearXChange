@@ -138,7 +138,7 @@ async function logout() {
     <main>
       <router-view />
       <Login v-if="activeOverlay === 'Login'" @close="showOverlay('None')" />
-      <Signup v-if="activeOverlay === 'Signup'" @close="showOverlay('None')" />
+      <Signup v-if="activeOverlay === 'Signup'" @close="showOverlay('None')" @show-login="showOverlay('Login')"/>
     </main>
 </template>
 
