@@ -5,7 +5,6 @@ import { invoke } from "@tauri-apps/api/core";
 const username = ref('');
 const password = ref('');
 const loginMsg = ref('');
-const router = useRouter();
 
 const usernameRegex = ref(/^[a-zA-Z0-9_]{3,30}$/);                      // 3 to 30 characters, letters, numbers, or underscores
 const passwordRegex = ref(/^\S{8,}$/);   
