@@ -41,11 +41,23 @@ function togglePassword() {
 </script>
 
 <template>
-<div class="flex items-center justify-center min-h-screen bg-base-200">
-<div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl relative">
+    <!-- Close button -->
+    <button
+        type="button"
+        @click="$emit('close')"
+        class="absolute top-2 right-2 btn btn-sm btn-circle btn-ghost"
+        aria-label="Close login dialog"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
 <div class="card-body">
 <form @submit.prevent="handleSignUp">
-<fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+<fieldset class="fieldset">
+  <legend class="text-2xl font-bold mb-4">Sign Up</legend>
   <div id="Username-input">
   <label class="input validator floating-label">
     <span>Username</span>
@@ -234,7 +246,7 @@ function togglePassword() {
     <p class="validator-hint hidden">Must be 7 to 20 digits</p>
   </div>
 
-  <button type="submit" class="btn btn-neutral mt-4">Sign Up</button>
+  <button type="submit" class="btn btn-primary mt-4">Sign Up</button>
   <p v-if="signUpMsg" class="mt-2 text-center">{{ signUpMsg }}</p>
 </fieldset>
 </form>

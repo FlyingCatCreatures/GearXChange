@@ -2,10 +2,12 @@
 import { ref, onMounted} from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import Login from '@components/Login.vue';
-
+import Signup from './components/Signup.vue';
 const userState = ref({ username: '', permission_level: 'none' });
 const theme = ref('light')
-const showLoginPage = ref(false);
+const activeOverlay = ref<OverlayType>('None');
+
+
 
 async function fetchUserState() {
   try {
@@ -39,8 +41,10 @@ onMounted(() => {
   }
 });
 
-function toggleLoginPage() {
-  showLoginPage.value = !showLoginPage.value;
+type OverlayType = 'None' | 'Login' | 'Signup';
+
+function showOverlay(type: OverlayType) {
+  activeOverlay.value = type;
 }
 
 async function logout() {
@@ -124,8 +128,8 @@ async function logout() {
             <li><a @click="logout">Logout</a></li>
           </template>
           <template v-else>
-            <li><a @click="toggleLoginPage">Login</a></li>
-            <li><router-link to="/signup">Sign Up</router-link></li>
+            <li><a @click="showOverlay('Login')">Login</a></li>
+            <li><a @click="showOverlay('Signup')">Sign Up</a></li>
           </template>
         </ul>
       </div>
@@ -133,7 +137,8 @@ async function logout() {
   </div>
     <main>
       <router-view />
-      <Login v-if="showLoginPage" @close="toggleLoginPage" />
+      <Login v-if="activeOverlay === 'Login'" @close="showOverlay('None')" />
+      <Signup v-if="activeOverlay === 'Signup'" @close="showOverlay('None')" />
     </main>
 </template>
 
