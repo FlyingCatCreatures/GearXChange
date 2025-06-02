@@ -114,30 +114,38 @@ function togglePassword() {
 </script>
 
 <template>
-  <div class="signup-outer">
-    <div class="signup-form-wrapper">
-      <form @submit.prevent="handleSignUp" class="signup-form">
-        <div class="signup-form-field">
-          <label for="username">Username:</label><br />
+  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Sign Up</h2>
+      <form @submit.prevent="handleSignUp" class="space-y-4">
+        <div class="form-control">
+          <label for="username" class="mt-4 text-center text-sm text-gray-600">
+            <span class="label-text">Username</span>
+          </label>
           <input placeholder="Username" pattern="^[a-zA-Z0-9_]{3,20}$" type="text" id="username" v-model="username" required
-            maxlength="20"
+            maxlength="20" class="input input-bordered w-full"
             :class="[{ invalid: touched.username && invalid.username, valid: touched.username && !invalid.username }, { flash: flash.username }]"
             @input="e => handleInput('username', e, /[^a-zA-Z0-9_]/g, 20)"
             @blur="() => handleBlur('username')"
           />
-          <!--                          alphanumeric of length 3-20 -->
         </div>
+        
         <div class="signup-form-field">
-          <label for="email">Email:</label><br />
+          <label for="email" class="mt-4 text-center text-sm text-gray-600">
+            <span class="label-text">Email</span>
+          </label>
           <input placeholder="Email" type="email" id="email" v-model="email" required
+            class="input input-bordered w-full"
             :class="[{ invalid: touched.email && invalid.email, valid: touched.email && !invalid.email }]"
             @blur="() => handleBlur('email')"
             @input="e => handleInput('email', e, /[^\w@.+-]/g, 50)"
           />
         </div>
+
         <div class="signup-form-field password-field">
-          <label for="password">Password:</label><br />
-          <div class="password-input-wrapper">
+          <label for="password" class="mt-4 text-center text-sm text-gray-600">
+            <span class="label-text">Password</span>
+          </label>          <div class="password-input-wrapper">
             <input
               :type="showPassword ? 'text' : 'password'"
               placeholder="Password"
@@ -146,46 +154,50 @@ function togglePassword() {
               v-model="password"
               required
               maxlength="32"
+              class="input input-bordered w-full"
               :class="[{ invalid: touched.password && invalid.password, valid: touched.password && !invalid.password }, { flash: flash.password }]"
               @input="e => handleInput('password', e, /\s/g, 32)"
               @blur="() => handleBlur('password')"
             />
             <button
               type="button"
-              class="password-eye"
+              class="absolute inset-y-0 right-0 flex items-center px-3"
               @click="togglePassword"
-              tabindex="-1"
               v-if="password.length > 0"
               aria-label="Toggle password visibility"
             >
-              <img v-if="!showPassword" src="@/assets/eye-open.svg" alt="Hide password" width="24" height="24" />
+              <img v-if="showPassword" src="@/assets/eye-open.svg" alt="Hide password" width="24" height="24" />
               <img v-else src="@/assets/eye-closed.svg" alt="Show password" width="24" height="24" />
             </button>
           </div>
-          <!--                          alphanumeric of length 8 or more -->
         </div>
+
         <div class="signup-form-field">
-          <label for="fullName">Full Name:</label><br />
+          <label for="fullName" class="mt-4 text-center text-sm text-gray-600">
+            <span class="label-text">Full name</span>
+          </label>          
           <input placeholder="Full Name" pattern="^[A-Za-z][A-Za-z\s\-']{1,48}[A-Za-z]$" type="text" id="fullName" v-model="fullName" required
-            maxlength="50"
+            maxlength="50" class="input input-bordered w-full"
             :class="[{ invalid: touched.fullName && invalid.fullName, valid: touched.fullName && !invalid.fullName }, { flash: flash.fullName }]"
             @input="e => handleInput('fullName', e, /[^A-Za-z\s\-']/g, 50)"
             @blur="() => handleBlur('fullName')"
           />
-          <!--                           a list of at least two names each starting with capital letters -->
         </div>
+
         <div class="signup-form-field">
-          <label for="phone">Phone:</label><br />
+          <label for="phone" class="mt-4 text-center text-sm text-gray-600">
+            <span class="label-text">Phone number</span>
+          </label>          
           <input placeholder="Phone number" pattern="^\+?[0-9\s\-]{7,20}$" type="text" id="phone" v-model="phone" required
-            maxlength="20"
+            maxlength="20" class="input input-bordered w-full"
             :class="[{ invalid: touched.phone && invalid.phone, valid: touched.phone && !invalid.phone }, { flash: flash.phone }]"
             @input="e => handleInput('phone', e, /[^0-9\s\-+]/g, 20)"
             @blur="() => handleBlur('phone')"
           />
         </div>
-        <button type="submit" class="signup-form-button">Sign Up</button>
+        <button type="submit" class="btn btn-primary w-full">Sign Up</button>
       </form>
-      <p>{{ signUpMsg }}</p>
+      <p class="mt-4 text-center text-sm text-gray-600">{{ signUpMsg }}</p>
     </div>
   </div>
 </template>
