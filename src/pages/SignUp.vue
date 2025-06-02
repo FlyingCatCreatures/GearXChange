@@ -11,100 +11,27 @@ const phone = ref('');
 const signUpMsg = ref('');
 const router = useRouter();
 
-// Validation state
-type Field = "username" | "email" | "password" | "fullName" | "phone";
-const touched = ref<Record<Field, boolean>>({ username: false, email: false, password: false, fullName: false, phone: false });
-const invalid = ref<Record<Field, boolean>>({ username: false, email: false, password: false, fullName: false, phone: false });
-const flash = ref<Record<Field, boolean>>({ username: false, email: false, password: false, fullName: false, phone: false });
-
-// Validation regexes
-const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-const passwordRegex = /^\S{8,}$/;
-const fullNameRegex = /^[A-Za-z][A-Za-z\s\-']{1,48}[A-Za-z]$/;
-const phoneRegex = /^\+?[0-9\s\-]{7,20}$/;
-const emailregex = /^\S+@\S+\.\S+$/;
-
-function validateField(field: string, value: string) {
-  switch (field) {
-    case 'username':
-      invalid.value.username = !usernameRegex.test(value);
-      break;
-    case 'password':
-      invalid.value.password = !passwordRegex.test(value);
-      break;
-    case 'fullName':
-      invalid.value.fullName = !fullNameRegex.test(value);
-      break;
-    case 'phone':
-      invalid.value.phone = !phoneRegex.test(value);
-      break;
-    case 'email':
-      // Use a simple email regex for live validation
-      invalid.value.email = !emailregex.test(value);
-      break;
-  }
-}
-
-function handleInput(field: Field, e: Event, regex: RegExp, maxLen: number) {
-  let val = (e.target as HTMLInputElement).value;
-  // Remove illegal chars and cap length
-  let legal = val.replace(regex, '').slice(0, maxLen);
-  if (val !== legal) {
-    flash.value[field] = true;
-    setTimeout(() => (flash.value[field] = false), 200);
-  }
-  (e.target as HTMLInputElement).value = legal;
-  // Update ref
-  switch (field) {
-    case 'username': username.value = legal; break;
-    case 'password': password.value = legal; break;
-    case 'fullName': fullName.value = legal; break;
-    case 'phone': phone.value = legal; break;
-    case 'email': email.value = legal; break;
-  }
-  // Mark as touched so validation color shows immediately
-  touched.value[field] = true;
-  validateField(field, legal);
-}
-
-function handleBlur(field: Field) {
-  touched.value[field] = true;
-  validateField(field, eval(field + '.value'));
-}
+const usernameRegex = ref(/^[a-zA-Z0-9_]{3,30}$/);                      // 3 to 30 characters, letters, numbers, or underscores
+const passwordRegex = ref(/^\S{8,}$/);                                  // At least 8 characters
+const fullNameRegex = ref(/^[a-zA-Z\s]{3,30}$/);                        // 3 to 30 characters, letters and spaces only
+const phoneRegex = ref(/^\+?[0-9]{7,20}([-\s]?[0-9]{1,20})*$/);         // 7 to 20 digits, optional "+" at the start, optional hyphens or spaces
+const emailregex = ref(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);                   // Valid email format
 
 async function handleSignUp() {
-  // Mark all as touched and validate (and update on every field)
-  (Object.keys(touched.value) as Field[]).forEach(f => {
-    touched.value[f] = true;
-    // Always validate with the latest value
-    let val = '';
-    switch (f) {
-      case 'username': val = username.value; break;
-      case 'email': val = email.value; break;
-      case 'password': val = password.value; break;
-      case 'fullName': val = fullName.value; break;
-      case 'phone': val = phone.value; break;
+    try {
+        await invoke('add_user', {
+        username: username.value.trim(), 
+        email: email.value.trim(), 
+        password: password.value.trim(),
+        fullName: fullName.value.trim(),
+        phone: phone.value.trim(), 
+        });
+        signUpMsg.value = "Account created successfully! Redirecting to login...";
+        setTimeout(() => router.push('/login'), 2000);
+    } catch (error) {
+        console.error("Error during sign up:", error);
+        signUpMsg.value = "Sign up failed. Please try again.";
     }
-    validateField(f, val);
-  });
-  if (Object.values(invalid.value).some(v => v)) {
-    signUpMsg.value = "Please fix the highlighted fields.";
-    return;
-  }
-  try {
-    await invoke('add_user', {
-      username: username.value.trim(), 
-      email: email.value.trim(), 
-      password: password.value.trim(),
-      fullName: fullName.value.trim(),
-      phone: phone.value.trim(), 
-    });
-    signUpMsg.value = "Account created successfully! Redirecting to login...";
-    setTimeout(() => router.push('/login'), 2000);
-  } catch (error) {
-    console.error("Error during sign up:", error);
-    signUpMsg.value = "Sign up failed. Please try again.";
-  }
 }
 
 const showPassword = ref(false);
@@ -114,90 +41,204 @@ function togglePassword() {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Sign Up</h2>
-      <form @submit.prevent="handleSignUp" class="space-y-4">
-        <div class="form-control">
-          <label for="username" class="mt-4 text-center text-sm text-gray-600">
-            <span class="label-text">Username</span>
-          </label>
-          <input placeholder="Username" pattern="^[a-zA-Z0-9_]{3,20}$" type="text" id="username" v-model="username" required
-            maxlength="20" class="input input-bordered w-full"
-            :class="[{ invalid: touched.username && invalid.username, valid: touched.username && !invalid.username }, { flash: flash.username }]"
-            @input="e => handleInput('username', e, /[^a-zA-Z0-9_]/g, 20)"
-            @blur="() => handleBlur('username')"
-          />
-        </div>
-        
-        <div class="signup-form-field">
-          <label for="email" class="mt-4 text-center text-sm text-gray-600">
-            <span class="label-text">Email</span>
-          </label>
-          <input placeholder="Email" type="email" id="email" v-model="email" required
-            class="input input-bordered w-full"
-            :class="[{ invalid: touched.email && invalid.email, valid: touched.email && !invalid.email }]"
-            @blur="() => handleBlur('email')"
-            @input="e => handleInput('email', e, /[^\w@.+-]/g, 50)"
-          />
-        </div>
-
-        <div class="signup-form-field password-field">
-          <label for="password" class="mt-4 text-center text-sm text-gray-600">
-            <span class="label-text">Password</span>
-          </label>          <div class="password-input-wrapper">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Password"
-              pattern="^[\S]{8,}$"
-              id="password"
-              v-model="password"
-              required
-              maxlength="32"
-              class="input input-bordered w-full"
-              :class="[{ invalid: touched.password && invalid.password, valid: touched.password && !invalid.password }, { flash: flash.password }]"
-              @input="e => handleInput('password', e, /\s/g, 32)"
-              @blur="() => handleBlur('password')"
-            />
-            <button
-              type="button"
-              class="absolute inset-y-0 right-0 flex items-center px-3"
-              @click="togglePassword"
-              v-if="password.length > 0"
-              aria-label="Toggle password visibility"
-            >
-              <img v-if="showPassword" src="@/assets/eye-open.svg" alt="Hide password" width="24" height="24" />
-              <img v-else src="@/assets/eye-closed.svg" alt="Show password" width="24" height="24" />
-            </button>
-          </div>
-        </div>
-
-        <div class="signup-form-field">
-          <label for="fullName" class="mt-4 text-center text-sm text-gray-600">
-            <span class="label-text">Full name</span>
-          </label>          
-          <input placeholder="Full Name" pattern="^[A-Za-z][A-Za-z\s\-']{1,48}[A-Za-z]$" type="text" id="fullName" v-model="fullName" required
-            maxlength="50" class="input input-bordered w-full"
-            :class="[{ invalid: touched.fullName && invalid.fullName, valid: touched.fullName && !invalid.fullName }, { flash: flash.fullName }]"
-            @input="e => handleInput('fullName', e, /[^A-Za-z\s\-']/g, 50)"
-            @blur="() => handleBlur('fullName')"
-          />
-        </div>
-
-        <div class="signup-form-field">
-          <label for="phone" class="mt-4 text-center text-sm text-gray-600">
-            <span class="label-text">Phone number</span>
-          </label>          
-          <input placeholder="Phone number" pattern="^\+?[0-9\s\-]{7,20}$" type="text" id="phone" v-model="phone" required
-            maxlength="20" class="input input-bordered w-full"
-            :class="[{ invalid: touched.phone && invalid.phone, valid: touched.phone && !invalid.phone }, { flash: flash.phone }]"
-            @input="e => handleInput('phone', e, /[^0-9\s\-+]/g, 20)"
-            @blur="() => handleBlur('phone')"
-          />
-        </div>
-        <button type="submit" class="btn btn-primary w-full">Sign Up</button>
-      </form>
-      <p class="mt-4 text-center text-sm text-gray-600">{{ signUpMsg }}</p>
-    </div>
+<div class="flex items-center justify-center min-h-screen bg-base-200">
+<div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+<div class="card-body">
+<form @submit.prevent="handleSignUp">
+<fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+  <div id="Username-input">
+  <label class="input validator floating-label">
+    <span>Username</span>
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        stroke-width="2.5"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </g>
+    </svg>
+    <input
+      v-model="username"
+      type="text"
+      required
+      placeholder="Username"
+      :pattern="usernameRegex.source"
+      minlength="3"
+      maxlength="30"
+      title="Must be 3 to 30 characters"
+    />
+    </label>
+    <p class="validator-hint hidden">
+      Must be 3 to 30 characters
+    </p>
   </div>
+
+  <div id="fullname-input">
+  <label class="input validator floating-label">
+    <span>Full name</span>
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        stroke-width="2.5"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </g>
+    </svg>
+    <input
+      v-model="fullName"
+      type="text"
+      required
+      placeholder="Full name"
+      :pattern="fullNameRegex.source"
+      minlength="3"
+      maxlength="30"
+      title="Must be 3 to 30 characters"
+    />
+    </label>
+    <p class="validator-hint hidden">
+      Must be 3 to 30 characters
+    </p>
+  </div>
+  <div id="email-input">
+    <label class="input validator floating-label">
+    <span>Email</span>
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        stroke-width="2.5"
+        fill="none"
+        stroke="currentColor"
+        >
+        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </g>
+    </svg>
+    <input type="email" v-model="email" placeholder="Email" :pattern="emailregex.source" required />
+    </label>
+    <div class="validator-hint hidden">Enter valid email address</div>
+  </div>
+
+  <div id="password-input">
+  <label class="input validator floating-label">
+    <span>Password</span>
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        stroke-width="2.5"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path
+          d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"
+        ></path>
+        <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
+      </g>
+    </svg>
+    <div class="relative">
+      <input
+        v-model="password"
+        :type="showPassword ? 'text' : 'password'"
+        required
+        placeholder="Password"
+        minlength="8"
+        :pattern="passwordRegex.source"
+        title="Must be at least 8 characters"
+        class="py-2.5 sm:py-3 ps-0 pe-20 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+      />
+      <button
+        type="button"
+        @click="togglePassword"
+        class="absolute inset-y-0 end-0 flex items-center z-20 px-0 cursor-pointer text-gray-400 rounded-e-md focus:outline-hidden focus:text-blue-600"
+      >
+        <svg
+          v-if="showPassword"
+          class="shrink-0 size-3.5"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <svg
+          v-else
+          class="shrink-0 size-3.5"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+          <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+          <line x1="2" x2="22" y1="2" y2="22"></line>
+        </svg>
+      </button>
+    </div>
+  </label>
+  <p class="validator-hint hidden">
+    Must be at least 8 characters
+  </p>
+  </div>
+
+  <div id="phone-input">
+    <label class="input validator floating-label">
+    <span>Phone number</span>
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <g fill="none">
+        <path
+            d="M7.25 11.5C6.83579 11.5 6.5 11.8358 6.5 12.25C6.5 12.6642 6.83579 13 7.25 13H8.75C9.16421 13 9.5 12.6642 9.5 12.25C9.5 11.8358 9.16421 11.5 8.75 11.5H7.25Z"
+            fill="currentColor"
+        ></path>
+        <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M6 1C4.61929 1 3.5 2.11929 3.5 3.5V12.5C3.5 13.8807 4.61929 15 6 15H10C11.3807 15 12.5 13.8807 12.5 12.5V3.5C12.5 2.11929 11.3807 1 10 1H6ZM10 2.5H9.5V3C9.5 3.27614 9.27614 3.5 9 3.5H7C6.72386 3.5 6.5 3.27614 6.5 3V2.5H6C5.44771 2.5 5 2.94772 5 3.5V12.5C5 13.0523 5.44772 13.5 6 13.5H10C10.5523 13.5 11 13.0523 11 12.5V3.5C11 2.94772 10.5523 2.5 10 2.5Z"
+            fill="currentColor"
+        ></path>
+        </g>
+    </svg>
+    <input
+        v-model="phone"
+        type="tel"
+        class="tabular-nums"
+        required
+        placeholder="Phone number"
+        :pattern="phoneRegex.source"
+        minlength="7"
+        maxlength="20"
+        title="Must be 7 to 20 digits"
+    />
+    </label>
+    <p class="validator-hint hidden">Must be 7 to 20 digits</p>
+  </div>
+
+  <button type="submit" class="btn btn-neutral mt-4">Sign Up</button>
+  <p v-if="signUpMsg" class="mt-2 text-center">{{ signUpMsg }}</p>
+</fieldset>
+</form>
+</div>
+</div>
+</div>
 </template>
