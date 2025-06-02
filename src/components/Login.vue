@@ -24,7 +24,7 @@ async function handleLogin() {
 
 <template>
 
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="$emit('close')">
   <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl relative">
     <!-- Close button -->
     <button
