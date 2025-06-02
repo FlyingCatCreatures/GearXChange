@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted} from 'vue';
 import { invoke } from '@tauri-apps/api/core';
+import Login from '@components/Login.vue';
 
 const userState = ref({ username: '', permission_level: 'none' });
-const showDropdown = ref(false);
 const theme = ref('light')
+const showLoginPage = ref(false);
 
 async function fetchUserState() {
   try {
@@ -38,11 +39,14 @@ onMounted(() => {
   }
 });
 
+function toggleLoginPage() {
+  showLoginPage.value = !showLoginPage.value;
+}
+
 async function logout() {
   try {
     await invoke('log_out');
     userState.value = { username: '', permission_level: 'none' };
-    showDropdown.value = false;
   } catch (error) {
     console.error('Failed to log out:', error);
   }
@@ -120,7 +124,7 @@ async function logout() {
             <li><a @click="logout">Logout</a></li>
           </template>
           <template v-else>
-            <li><router-link to="/login">Login</router-link></li>
+            <li><a @click="toggleLoginPage">Login</a></li>
             <li><router-link to="/signup">Sign Up</router-link></li>
           </template>
         </ul>
@@ -129,6 +133,7 @@ async function logout() {
   </div>
     <main>
       <router-view />
+      <Login v-if="showLoginPage" @close="toggleLoginPage" />
     </main>
 </template>
 
