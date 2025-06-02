@@ -8,6 +8,9 @@ const password = ref('');
 const loginMsg = ref('');
 const router = useRouter();
 
+const usernameRegex = ref(/^[a-zA-Z0-9_]{3,30}$/);                      // 3 to 30 characters, letters, numbers, or underscores
+const passwordRegex = ref(/^\S{8,}$/);   
+
 async function handleLogin() {
     // the cast to boolean is not strictly necessary but it allows ts to infer the type
     // this invoke already returns a boolean so that's why it's not strictly necessary
@@ -15,7 +18,6 @@ async function handleLogin() {
     let verified = Boolean(await invoke('verify_user', { username: username.value.trim(), password: password.value.trim() })); //TODO: instead of trimming just limit the input box
 
     loginMsg.value = Boolean(verified) ? `Logged in successfully as ${username.value}` : "Login failed. Please check your credentials."; 
-    router.push('/');
 }
 
 </script>
@@ -50,13 +52,25 @@ async function handleLogin() {
                 fill="none"
                 stroke="currentColor"
               >
-                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
               </g>
             </svg>
-            <input type="email" placeholder="mail@site.com" required />
+            <input
+              type="text"
+              v-model="username"
+              required
+              placeholder="Username"
+              :pattern="usernameRegex.source"
+              minlength="3"
+              maxlength="30"
+              title="Only letters, numbers or dash"
+            />
           </label>
-          <div class="validator-hint hidden">Enter valid email address</div>
+          <p class="validator-hint hidden">
+            Must be 3 to 30 characters
+            <br />containing only letters, numbers or dash
+          </p>
           <label class="input validator">
             <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <g
@@ -74,10 +88,11 @@ async function handleLogin() {
             </svg>
             <input
               type="password"
+              v-model="password"
               required
               placeholder="Password"
               minlength="8"
-              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+              :pattern="passwordRegex.source"
               title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
             />
           </label>
