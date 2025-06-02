@@ -326,14 +326,19 @@ pub async fn verify_user(username: &str, password: &str, app_handle: AppHandle,)
         .await
         .map_err(|e| e.to_string())?;   
 
+
     let verified = count_email.0 > 0 || count_name.0 > 0;
     let permissions: String = String::from("regular");
     if verified {
         if let Err(e) = crate::statemanager::set_user_state(username.to_string(), permissions, &app_handle) {
             return Err(format!("Failed to set user state: {}", e));
         }
+        println!("Verified {}", username)
+    }else{
+        println!("Failed to verify {}", username)
     }
-    Ok(count_email.0 > 0 || count_name.0 > 0)
+
+    Ok(verified)
 }
 
 #[command]
