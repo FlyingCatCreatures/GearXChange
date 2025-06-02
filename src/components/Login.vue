@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/core";
 
 const username = ref('');
@@ -97,8 +96,7 @@ async function handleLogin() {
             />
           </label>
           <p class="validator-hint hidden">
-            Must be more than 8 characters, including
-            <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
+            Must be at least than 8 characters
           </p>
           <button type="submit" class="btn btn-primary mt-4">Login</button>
           <p class="text-error">{{ loginMsg }}</p>
