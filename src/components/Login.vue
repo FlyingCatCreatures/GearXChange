@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/core";
 
 const username = ref('');
 const password = ref('');
 const loginMsg = ref('');
-const router = useRouter();
 
 async function handleLogin() {
     // the cast to boolean is not strictly necessary but it allows ts to infer the type
@@ -15,7 +13,6 @@ async function handleLogin() {
     let verified = Boolean(await invoke('verify_user', { username: username.value.trim(), password: password.value.trim() })); //TODO: instead of trimming just limit the input box
 
     loginMsg.value = Boolean(verified) ? `Logged in successfully as ${username.value}` : "Login failed. Please check your credentials."; 
-    router.push('/');
 }
 
 </script>
@@ -77,13 +74,12 @@ async function handleLogin() {
               required
               placeholder="Password"
               minlength="8"
-              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-              title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
+              pattern="/^\S{8,}$/"
+              title="Must be at least than 8 characters"
             />
           </label>
           <p class="validator-hint hidden">
-            Must be more than 8 characters, including
-            <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
+            Must be at least than 8 characters
           </p>
           <button type="submit" class="btn btn-primary mt-4">Login</button>
           <p class="text-error">{{ loginMsg }}</p>
