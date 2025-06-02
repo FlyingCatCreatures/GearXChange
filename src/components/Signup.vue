@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { invoke } from "@tauri-apps/api/core";
 
 const username = ref('');
@@ -9,7 +8,6 @@ const password = ref('');
 const fullName = ref(''); 
 const phone = ref('');
 const signUpMsg = ref('');
-const router = useRouter();
 const emit = defineEmits(['show-login', 'close']);
 
 const usernameRegex = ref(/^[a-zA-Z0-9_]{3,30}$/);                      // 3 to 30 characters, letters, numbers, or underscores

@@ -5,7 +5,6 @@ import Login from '@components/Login.vue';
 import Signup from './components/Signup.vue';
 const userState = ref({ username: '', permission_level: 'none' });
 const theme = ref('light')
-const activeOverlay = ref<OverlayType>('None');
 
 
 
@@ -42,6 +41,7 @@ onMounted(() => {
 });
 
 type OverlayType = 'None' | 'Login' | 'Signup';
+const activeOverlay = ref<OverlayType>('None');
 
 function showOverlay(type: OverlayType) {
   activeOverlay.value = type;
