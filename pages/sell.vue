@@ -55,23 +55,23 @@ async function handleCreateListing() {
       console.log("Uploaded file:", pictureFileName.value);
     }
     
-    await $fetch('/api/favourites', {
+    await $fetch('/api/listings', {
       method: 'POST',
       body: {
         plate: plate.value.trim(),
         work_hours: workHours.value,
         title: title.value.trim(),
         price: price.value,
-        priceType: priceType.value,
+        price_type: priceType.value,
         condition: condition.value,
         location: location.value.trim(),
         picture: pictureFileName.value || null,
         description: description.value.trim() || null,
         make: make.value.trim(),
         model: model.value.trim(),
-        vehicleType: vehicleType.value.trim(),
-        yearOfManufacture: yearOfManufacture.value,
-        fuelOrPower: fuelOrPower.value.trim(),
+        vehicle_type: vehicleType.value.trim(),
+        year_of_manufacture: yearOfManufacture.value,
+        fuel_or_power: fuelOrPower.value.trim(),
         weight: weight.value,
       },
     });
