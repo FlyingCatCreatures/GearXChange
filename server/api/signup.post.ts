@@ -4,8 +4,20 @@ import { generateSessionToken, createSession } from '~/server/lib/session';
 import { setSessionTokenCookie } from '~/server/lib/cookies';
 import { hash } from 'bcryptjs';
 
+import { z } from "zod/v4"; 
+const User = z.object({ 
+    email: z.email(),
+    password: z.string().min(8)
+});
+
 export default defineEventHandler(async (event) => {
 	const body = await readBody<{ email: string; password: string }>(event);
+
+    // Check that the thing to be verified match the required criteria
+    const res = User.safeParse({email: body.email, password: body.password})
+    if(!res.success){
+        throw createError({ statusCode: 401, message: 'Invalid credentials' });
+    }
 
 	const hashedPassword = await hash(body.password, 10);
 	const [user] = await db
