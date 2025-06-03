@@ -2,9 +2,10 @@
 const theme = ref('light');
 
 
-
-const user = useUser()
+type User = globalThis.Ref<{id: string, email: string, hashedPassword: string} | null>
+const user: User = useUser()
 const isLoggedIn = computed(() => !!user.value)
+
 const { toastMessage, showToast, triggerToast } = useToast()
 
 function setTheme(newTheme: string) {
