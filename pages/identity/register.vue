@@ -27,9 +27,18 @@
         />
       </label>
     </div>
+    <div class="mb-2">
+    <label class="label">
+        <input type="checkbox" v-model="loginDirectly" class="toggle" />
+        Log in directly?
+    </label>
+    </div>
+
+    <div>
     <button type="submit" :disabled="loading" class="btn">
-      {{ loading ? 'Creating account...' : 'Sign up' }}
+        {{ loading ? 'Creating account...' : 'Sign up' }}
     </button>
+    </div>
     <p v-if="error" class="text-error whitespace-pre-line">{{ error }}</p>
         <p class="text-sm">
       Want to login instead?
@@ -42,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+const loginDirectly = ref(false)
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -63,8 +73,38 @@ async function handleSignup() {
       body: User.parse({ email: email.value, password: password.value }),
     })
 
-    // optional: auto-login or redirect
-    navigateTo('/identity/login')
+    if(loginDirectly.value){
+        try {
+            await $fetch('/api/login', {
+            method: 'POST',
+            body: User.parse({email: email.value, password: password.value }),
+            })
+
+            useUser()
+
+            // Show toast after successful login
+            useToast().triggerToast('Logged in successfully')
+
+            // redirect on success 
+            navigateTo('/')
+        } catch (err: any) {
+            if(err instanceof z.ZodError){
+                let errmsg = ""
+                for(let i=0; i<err.issues.length;i++){
+                    if(i!=0) errmsg+="\n"
+                    errmsg+=err.issues[i].message 
+                }
+                error.value = errmsg
+            }
+            else{
+                error.value = err?.data?.message ?? 'Login failed'
+            }
+        } finally {
+            loading.value = false
+        }
+    }
+    navigateTo('/') // Go to home page after either logging in or signing up
+    
   } catch (err: any) {
     if(err instanceof z.ZodError){
         let errmsg = ""
