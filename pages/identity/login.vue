@@ -71,7 +71,17 @@ async function handleLogin() {
     // redirect on success 
     navigateTo('/')
   } catch (err: any) {
-    error.value = err?.data?.message ?? 'Login failed'
+    if(err instanceof z.ZodError){
+        let errmsg = ""
+        for(let i=0; i<err.issues.length;i++){
+            if(i!=0) errmsg+="\n"
+            errmsg+=err.issues[i].message 
+        }
+        error.value = errmsg
+    }
+    else{
+        error.value = err?.data?.message ?? 'Login failed'
+    }
   } finally {
     loading.value = false
   }
