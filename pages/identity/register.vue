@@ -64,7 +64,7 @@ async function handleSignup() {
     })
 
     // optional: auto-login or redirect
-    navigateTo('/')
+    navigateTo('/identity/login')
   } catch (err: any) {
     if(err instanceof z.ZodError){
         let errmsg = ""

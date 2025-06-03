@@ -131,6 +131,9 @@ onMounted(() => {
               <p class="text-lg font-semibold">Price: <span>{{ listing.price || 'N/A' }}</span></p>
               <p>Condition: <span>{{ listing.condition }}</span></p>
               <p>Location: <span>{{ listing.location }}</span></p>
+                <div v-if="listing.picture" class="w-full h-48 overflow-hidden bg-base-200">
+                <img :src="listing.picture" class="h-full mx-auto object-contain rounded-t-box" alt="Uploaded image" />
+                </div>
               <p v-if="listing.description" class="text-sm opacity-80 mt-2">{{ listing.description }}</p>
             </div>
           </div>
@@ -170,6 +173,12 @@ onMounted(() => {
                 <p class="text-lg font-semibold">Price: <span>{{ listing.price || 'N/A' }}</span></p>
                 <p>Condition: <span>{{ listing.condition }}</span></p>
                 <p>Location: <span>{{ listing.location }}</span></p>
+                <div v-if="listing.picture" class="w-full h-48 overflow-hidden bg-base-200">
+                <img :src="listing.picture" class="h-full mx-auto object-contain rounded-t-box" alt="Uploaded image" />
+                </div>
+                <div v-else class="w-full h-48 flex items-center justify-center bg-base-200 text-gray-500 italic">
+                No picture available
+                </div>
                 <p v-if="listing.description" class="text-sm opacity-80 mt-2">{{ listing.description }}</p>
               </div>
             </div>

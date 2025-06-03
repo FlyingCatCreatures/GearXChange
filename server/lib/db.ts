@@ -36,7 +36,7 @@ export const machineryListingsTable = sqliteTable("machinery_listings", {
   price_type: text("price_type").notNull(),
   condition: text("condition").notNull(),
   location: text("location").notNull(),
-  picture_url: text("picture_url"),
+  picture: text("picture"),
   description: text("description"),
   make: text("make").notNull(),
   model: text("model").notNull(),

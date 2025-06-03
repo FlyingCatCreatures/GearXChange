@@ -48,13 +48,17 @@ function onFileChange(event: Event) {
   }
 }
 
+async function fileToBase64(file: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file); // Produces a data URL with base64-encoded image
+  });
+}
+
 async function handleCreateListing() {
   try {
-    // now just log file name, backend implementation needed
-    if (pictureFile.value) {
-      console.log("Uploaded file:", pictureFileName.value);
-    }
-    
     await $fetch('/api/listings', {
       method: 'POST',
       body: {
@@ -65,7 +69,7 @@ async function handleCreateListing() {
         price_type: priceType.value,
         condition: condition.value,
         location: location.value.trim(),
-        picture: pictureFileName.value || null,
+        picture: await fileToBase64(pictureFile.value) || null, // Parse file into a base64 encoding of itself to store in backend
         description: description.value.trim() || null,
         make: make.value.trim(),
         model: model.value.trim(),
