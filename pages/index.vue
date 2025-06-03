@@ -67,9 +67,9 @@ async function toggleFavourite(listingId: number) {
     favouriteError.value = "";
   } catch (e: any) {
     console.error("Failed to toggle favourite:", e);
-    if (typeof e === "string" && e.includes("not authenticated")) {
+    if (typeof e === "string" && e.includes('Not authenticated')) {
       favouriteError.value = "You must be logged in to add favourites.";
-    } else if (e && typeof e.message === "string" && e.message.includes("not authenticated")) {
+    } else if (e && typeof e.message === "string" && e.message.includes('Not authenticated')) {
       favouriteError.value = "You must be logged in to add favourites.";
     } else {
       favouriteError.value = "Failed to update favourite. Please try again.";
