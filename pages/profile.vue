@@ -2,10 +2,8 @@
 import { ref } from 'vue'
 
 // This caused desyncing issues, so we just call the api directly instead of assigning like this
-// const user = useUser()
-useUser()
-let res = (await (await fetch("api/me")).json())
-let user = ref(res)
+const user = await useUser()
+
 const form = ref({
   email: user.value && typeof user.value === 'object' && 'email' in user.value ? (user.value as any).email : '',
   password: '',

@@ -5,7 +5,7 @@ const title = ref("");
 const price = ref<number | null>(null);
 const priceType = ref("fixed");
 const condition = ref("new");
-const location = ref("");
+const location = ref(((await useUser()).value as unknown as { location?: string })?.location ?? '');
 const description = ref("");
 const make = ref("");
 const model = ref("");
@@ -84,7 +84,7 @@ async function handleCreateListing() {
 
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";
-    resetForm();
+    await resetForm();
     stepTwo.value = false;
   } catch (error) {
     console.error("Failed to create listing:", error);
@@ -93,15 +93,14 @@ async function handleCreateListing() {
   }
 }
 
-function resetForm() {
+async function resetForm() {
   plate.value = "";
   workHours.value = null;
   title.value = "";
   price.value = null;
   priceType.value = "fixed";
   condition.value = "new";
-  const user = useUser() as Ref<User | null>;
-  location.value = user.value?.location ?? '';
+  location.value = ((await useUser()).value as unknown as { location?: string })?.location ?? '';
   description.value = "";
   make.value = "";
   model.value = "";
