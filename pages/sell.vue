@@ -48,15 +48,28 @@ function onFileChange(event: Event) {
   }
 }
 
-async function fileToBase64(file: any): Promise<string> {
+/**
+ * fileToBase64 - Converts a File object to a base64 string.
+ *
+ * @param {File} file - The file to convert.
+ * @returns {Promise<string>} Resolves to the base64-encoded string.
+ * @throws Will throw an error if the FileReader fails.
+ */
+async function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
-    reader.readAsDataURL(file); // Produces a data URL with base64-encoded image
+    reader.readAsDataURL(file);
   });
 }
 
+/**
+ * handleCreateListing - Submits the listing data to the backend.
+ *
+ * @returns {Promise<void>} Resolves when listing is created.
+ * @throws Will throw an error if the API request fails.
+ */
 async function handleCreateListing() {
   try {
     await $fetch('/api/listings', {
@@ -69,7 +82,7 @@ async function handleCreateListing() {
         price_type: priceType.value,
         condition: condition.value,
         location: location.value.trim(),
-        picture: await fileToBase64(pictureFile.value) || null, // Parse file into a base64 encoding of itself to store in backend
+        picture: await fileToBase64(pictureFile.value) || null,
         description: description.value.trim() || null,
         make: make.value.trim(),
         model: model.value.trim(),
@@ -112,6 +125,7 @@ function resetForm() {
   imagePreview.value = null;
 }
 </script>
+
 
 <template>
   <div class="sell-page max-w-xl mx-auto p-6">
