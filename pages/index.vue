@@ -131,20 +131,24 @@ onMounted(() => {
          <!-- Search & Sort Bar -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-2xl mx-auto">
         <!-- Search Bar with icon -->
-        <label class="input w-full sm:flex-1 relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <div class="relative w-full sm:flex-1">
+        <svg
+            class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-gray-500 pointer-events-none z-10"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+        >
             <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
             </g>
-            </svg>
-            <input
+        </svg>
+        <input
             type="search"
             class="input input-bordered w-full pl-10"
             placeholder="Search"
             v-model="searchQuery"
-            />
-        </label>
+        />
+        </div>
 
     <!-- Sort Dropdown -->
     <div class="relative w-10">
