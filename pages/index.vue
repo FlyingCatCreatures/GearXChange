@@ -1,5 +1,7 @@
 
 <script lang="ts" setup>
+import listingcard from "/Users/anne/Desktop/Uni-Stuff/2024-2025/KW3KW4/GearXChange/pages/components/listingcard.vue";
+
 const listings = ref<any[]>([]);
 const loading = ref(true);
 const errorMsg = ref("");
@@ -78,8 +80,15 @@ async function toggleFavourite(listingId: number) {
   }
 }
 
+let refreshIntervalId: any = null;
+
 onMounted(() => {
   setTimeout(getListings, 200);
+  refreshIntervalId = setInterval(getListings, 30000); // refresh listings every 30 seconds
+});
+
+onUnmounted(() => {
+  if (refreshIntervalId) clearInterval(refreshIntervalId);
 });
 </script>
 
@@ -105,38 +114,13 @@ onMounted(() => {
       <h2 class="text-3xl font-bold mb-6 text-center">Your Favourites</h2>
       <div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
-          <div
+          <listingcard
             v-for="listing in listings.filter(l => favouriteIds.has(Number(l.id)))"
             :key="'fav-' + listing.id"
-            class="card bg-base-100 shadow-xl relative"
-          >
-            <!-- Star button -->
-            <button
-              class="btn btn-ghost btn-s btn-circle absolute top-2 right-2 z-10"
-              @click.stop="toggleFavourite(Number(listing.id))"
-              :aria-label="favouriteIds.has(Number(listing.id)) ? 'Remove from favourites' : 'Add to favourites'"
-            >
-              <svg v-if="favouriteIds.has(Number(listing.id))" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-warning fill-warning" viewBox="0 0 24 24">
-                <path d="M12 17.75l-6.172 3.245 1.179-6.873L2 9.755l6.914-1.005L12 2.25l3.086 6.5L22 9.755l-5.007 4.367 1.179 6.873z"/>
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-warning stroke-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 17.75l-6.172 3.245 1.179-6.873L2 9.755l6.914-1.005L12 2.25l3.086 6.5L22 9.755l-5.007 4.367 1.179 6.873z"/>
-              </svg>
-            </button>
-            <div v-if="listing.pictureUrl" class="w-full h-48 overflow-hidden flex items-center justify-center bg-base-200">
-              <img :src="listing.pictureUrl" :alt="listing.title" class="object-cover w-full h-full rounded-t-box" />
-            </div>
-            <div class="card-body">
-              <h3 class="card-title">{{ listing.title }}</h3>
-              <p class="text-lg font-semibold">Price: <span>{{ listing.price || 'N/A' }}</span></p>
-              <p>Condition: <span>{{ listing.condition }}</span></p>
-              <p>Location: <span>{{ listing.location }}</span></p>
-                <div v-if="listing.picture" class="w-full h-48 overflow-hidden bg-base-200">
-                <img :src="listing.picture" class="h-full mx-auto object-contain rounded-t-box" alt="Uploaded image" />
-                </div>
-              <p v-if="listing.description" class="text-sm opacity-80 mt-2">{{ listing.description }}</p>
-            </div>
-          </div>
+            :listing="listing"
+            :isFavourite="true"
+            :onToggleFavourite="toggleFavourite"
+            />
         </div>
       </div>
     </section>
@@ -151,37 +135,13 @@ onMounted(() => {
       <div v-else>
         <div v-if="listings.length > 0">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
-            <div v-for="listing in listings.slice(0,9)" :key="listing.id" class="card bg-base-100 shadow-xl relative">
-              <!-- Star button -->
-              <button
-                class="btn btn-ghost btn-s btn-circle absolute top-2 right-2 z-10"
-                @click.stop="toggleFavourite(Number(listing.id))"
-                :aria-label="favouriteIds.has(Number(listing.id)) ? 'Remove from favourites' : 'Add to favourites'"
-              >
-                <svg v-if="favouriteIds.has(Number(listing.id))" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-warning fill-warning" viewBox="0 0 24 24">
-                  <path d="M12 17.75l-6.172 3.245 1.179-6.873L2 9.755l6.914-1.005L12 2.25l3.086 6.5L22 9.755l-5.007 4.367 1.179 6.873z"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-warning stroke-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 17.75l-6.172 3.245 1.179-6.873L2 9.755l6.914-1.005L12 2.25l3.086 6.5L22 9.755l-5.007 4.367 1.179 6.873z"/>
-                </svg>
-              </button>
-              <div v-if="listing.pictureUrl" class="w-full h-48 overflow-hidden flex items-center justify-center bg-base-200">
-                <img :src="listing.pictureUrl" :alt="listing.title" class="object-cover w-full h-full rounded-t-box" />
-              </div>
-              <div class="card-body">
-                <h3 class="card-title">{{ listing.title }}</h3>
-                <p class="text-lg font-semibold">Price: <span>{{ listing.price || 'N/A' }}</span></p>
-                <p>Condition: <span>{{ listing.condition }}</span></p>
-                <p>Location: <span>{{ listing.location }}</span></p>
-                <div v-if="listing.picture" class="w-full h-48 overflow-hidden bg-base-200">
-                <img :src="listing.picture" class="h-full mx-auto object-contain rounded-t-box" alt="Uploaded image" />
-                </div>
-                <div v-else class="w-full h-48 flex items-center justify-center bg-base-200 text-gray-500 italic">
-                No picture available
-                </div>
-                <p v-if="listing.description" class="text-sm opacity-80 mt-2">{{ listing.description }}</p>
-              </div>
-            </div>
+            <listingcard
+                v-for="listing in listings.slice(0, 9)"
+                :key="listing.id"
+                :listing="listing"
+                :isFavourite="favouriteIds.has(Number(listing.id))"
+                :onToggleFavourite="toggleFavourite"
+                />
           </div>
         </div>
         <p v-else class="text-center text-lg mt-8">No listings available. Be the first to add your machine!</p>

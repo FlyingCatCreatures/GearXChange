@@ -1,5 +1,5 @@
 import { db, machineryListingsTable, favouriteListingsTable } from './db';
-import { eq, desc, asc, and } from 'drizzle-orm';
+import { eq, desc, asc, and, sql } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
 
 export async function createListing(listing: Omit<InferSelectModel<typeof machineryListingsTable>, "id" | "views" | "created_at">) {
@@ -36,3 +36,14 @@ export async function getFavouriteListings(user_id: number) {
     .leftJoin(machineryListingsTable, eq(favouriteListingsTable.listing_id, machineryListingsTable.id))
     .where(eq(favouriteListingsTable.user_id, user_id));
 }
+
+
+export async function incrementListingViews(listing_id: number) {
+  await db.update(machineryListingsTable)
+    .set({
+        views: sql`${machineryListingsTable.views} + 1`,
+    })
+    .where(eq(machineryListingsTable.id, listing_id));
+}
+
+
