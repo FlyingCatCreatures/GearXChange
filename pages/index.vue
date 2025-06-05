@@ -17,6 +17,18 @@ const miniSearch = new MiniSearch({
   },
 });
 
+const sortOption = ref("default");
+
+// Orders the listings after they've been filtered with minisearch
+const sortedListings = computed(() => {
+  const listingsToSort = [...filteredListings.value];
+  if (sortOption.value === "default") { return listingsToSort; }
+  else if (sortOption.value === "priceAsc") { return listingsToSort.sort((a, b) => (a.price ?? 0) - (b.price ?? 0)); } 
+  else if (sortOption.value === "priceDesc") { return listingsToSort.sort((a, b) => (b.price ?? 0) - (a.price ?? 0)); }
+  console.warn("other sorting than default, priceAsc, priceDesc selected")
+  return listingsToSort;
+});
+
 const favouriteIds = ref<Set<number>>(new Set());
 const favouriteError = ref("");
 
@@ -116,32 +128,55 @@ onMounted(() => {
         <div>
           <h1 class="text-5xl font-bold mb-4">GearXChange</h1>
           <p class="py-2 text-lg mb-6">Buy, sell, or rent heavy machinery with ease.</p>
-          <!-- Search Bar -->
-            <label class="input">
-                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <g
-                    stroke-linejoin="round"
-                    stroke-linecap="round"
-                    stroke-width="2.5"
-                    fill="none"
-                    stroke="currentColor"
-                    >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                    </g>
-                </svg>
-                <input type="search" class="grow" placeholder="Search" v-model="searchQuery" />
-            </label>
-        </div>
-      </div>
-    </section>
+         <!-- Search & Sort Bar -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-2xl mx-auto">
+        <!-- Search Bar with icon -->
+        <label class="input w-full sm:flex-1 relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+            </g>
+            </svg>
+            <input
+            type="search"
+            class="input input-bordered w-full pl-10"
+            placeholder="Search"
+            v-model="searchQuery"
+            />
+        </label>
+
+    <!-- Sort Dropdown -->
+    <div class="relative w-10">
+        <select class="select select-bordered pl-10 pr-6" v-model="sortOption">
+            <option value="default">Default</option>
+            <option value="priceAsc">Price ↑</option>
+            <option value="priceDesc">Price ↓</option>
+        </select>
+        <svg
+            class="absolute left-3 top-1/2 -translate-y-7/20 h-5 w-5 opacity-50 text-gray-500 pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+        <path d="M3 4h18M6 8h12M9 12h6M12 16h0M15 20h0" />
+        </svg>
+    </div>
+    </div>
+</div>
+</div>
+</section>
 
     <!-- Favourites Listings (if any) -->
     <section v-if="favouriteIds.size > 0" class="favourites-listings py-8 bg-base-200">
       <h2 class="text-3xl font-bold mb-6 text-center">Your Favourites</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
         <listingcard
-          v-for="listing in filteredListings.filter(l => favouriteIds.has(Number(l.id)))"
+          v-for="listing in sortedListings.filter(l => favouriteIds.has(Number(l.id)))"
           :key="'fav-' + listing.id"
           :listing="listing"
           :isFavourite="true"
@@ -161,7 +196,7 @@ onMounted(() => {
         <div v-if="filteredListings.length > 0">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
             <listingcard
-              v-for="listing in filteredListings.slice(0, 9)"
+              v-for="listing in sortedListings.slice(0, 9)"
               :key="listing.id"
               :listing="listing"
               :isFavourite="favouriteIds.has(Number(listing.id))"
