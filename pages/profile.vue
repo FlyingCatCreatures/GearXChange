@@ -26,21 +26,22 @@ async function saveProfile() {
   }
   loading.value = true
   try {
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1000))
-    // Here you would call your real API, e.g. $fetch('/api/profile', ...)
-    if (user.value && typeof user.value === 'object') {
-      (user.value as any).email = form.value.email
-      ;(user.value as any).location = form.value.location
-      ;(user.value as any).language = form.value.language
-      ;(user.value as any).name = form.value.name
-      ;(user.value as any).fullName = form.value.name
+    const res = await $fetch<{ success?: boolean; message?: string }>('/api/update-credentials', {
+      method: 'POST',
+      body: {
+        email: form.value.email,
+        password: form.value.password || undefined,
+      },
+    })
+    if (res && res.success) {
+      successMsg.value = 'Profile updated successfully.'
+      form.value.password = ''
+      form.value.confirm = ''
+    } else {
+      errorMsg.value = res?.message || 'Failed to update profile.'
     }
-    successMsg.value = 'Profile updated successfully.'
-    form.value.password = ''
-    form.value.confirm = ''
   } catch (e: any) {
-    errorMsg.value = 'Failed to update profile.'
+    errorMsg.value = e?.data?.message || 'Failed to update profile.'
   } finally {
     loading.value = false
   }

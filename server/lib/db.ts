@@ -15,7 +15,7 @@ export const userTable = sqliteTable("user", {
 });
 
 export const sessionTable = sqliteTable("session", {
-  id: text("id").primaryKey(),
+  id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
     .references(() => userTable.id),
