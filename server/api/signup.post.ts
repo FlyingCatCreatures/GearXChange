@@ -7,14 +7,15 @@ import { hash } from 'bcryptjs';
 import { z } from "zod/v4"; 
 const User = z.object({ 
     email: z.email(),
+    name: z.string(),
     password: z.string().min(8)
 });
 
 export default defineEventHandler(async (event) => {
-	const body = await readBody<{ email: string; password: string }>(event);
+	const body = await readBody<{ email: string; password: string , name: string}>(event);
 
     // Check that the thing to be verified match the required criteria
-    const res = User.safeParse({email: body.email, password: body.password})
+    const res = User.safeParse({email: body.email, password: body.password, name: body.name})
     if(!res.success){
         throw createError({ statusCode: 401, message: 'Invalid credentials' });
     }
@@ -22,7 +23,7 @@ export default defineEventHandler(async (event) => {
 	const hashedPassword = await hash(body.password, 10);
 	const [user] = await db
 		.insert(userTable)
-		.values({ email: body.email, hashedPassword })
+		.values({ email: body.email, hashedPassword, name: body.name })
 		.returning({ id: userTable.id });
 
 	const token = generateSessionToken();

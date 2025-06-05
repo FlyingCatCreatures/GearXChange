@@ -9,6 +9,7 @@ export const db = drizzle(sqliteDB);
 
 export const userTable = sqliteTable("user", {
   id: integer("id").primaryKey(),
+  name: text("name").notNull().unique(),
   email: text("email").notNull().unique(),
   hashedPassword: text("hashed_password").notNull()
 });

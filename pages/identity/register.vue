@@ -3,6 +3,18 @@
 <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl relative pointer-events-auto">
 <div class="card-body">
   <form @submit.prevent="handleSignup" class="space-y-4">
+        <div>
+        <label class="floating-label">
+        <span>Name</span>
+        <input
+            v-model="name"
+            type="text"
+            required
+            placeholder="Name"
+            class="input"
+        />
+      </label>
+    </div>
     <div>
       <label class="floating-label">
         <span>Email</span>
@@ -25,7 +37,7 @@
             placeholder="Password"
             class="input"
         />
-      </label>
+        </label>
     </div>
     <div class="mb-2">
     <label class="label">
@@ -56,10 +68,12 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const name = ref('')
 
 import { z } from "zod/v4"; 
 const User = z.object({ 
   email: z.email(),
+  name: z.string(),
   password: z.string().min(8)
 });
 
@@ -70,14 +84,14 @@ async function handleSignup() {
   try {
     await $fetch('/api/signup', {
       method: 'POST',
-      body: User.parse({ email: email.value, password: password.value }),
+      body: User.parse({ email: email.value, password: password.value, name: name.value}),
     })
 
     if(loginDirectly.value){
         try {
             await $fetch('/api/login', {
             method: 'POST',
-            body: User.parse({email: email.value, password: password.value }),
+            body: User.parse({email: email.value, password: password.value, name: name.value }),
             })
 
             useUser()

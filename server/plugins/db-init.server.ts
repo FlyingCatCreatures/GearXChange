@@ -5,6 +5,7 @@ export default defineNitroPlugin(async () => {
   db.run(`
     CREATE TABLE IF NOT EXISTS user (
       id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
       email TEXT NOT NULL UNIQUE,
       hashed_password TEXT NOT NULL
     )
@@ -52,9 +53,9 @@ export default defineNitroPlugin(async () => {
 
   // Insert default users if not present
   await db.insert(userTable).values([
-    { id: 1, email: 'john.doe@agritech.com', hashedPassword: 'hashedpassword1' },
-    { id: 2, email: 'sarah.smith@greenvalley.org', hashedPassword: 'hashedpassword2' },
-    { id: 3, email: 'mike.chen@premiumfarms.co', hashedPassword: 'hashedpassword3' }
+    { id: 1, email: 'john.doe@agritech.com', hashedPassword: 'hashedpassword1', name:"john" },
+    { id: 2, email: 'sarah.smith@greenvalley.org', hashedPassword: 'hashedpassword2', name: "sarah" },
+    { id: 3, email: 'mike.chen@premiumfarms.co', hashedPassword: 'hashedpassword3', name: "mike" }
   ]).onConflictDoNothing();
 
   // Insert default listings if not present

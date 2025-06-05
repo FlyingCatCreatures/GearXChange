@@ -1,6 +1,6 @@
 
 <script lang="ts" setup>
-import listingcard from "/Users/anne/Desktop/Uni-Stuff/2024-2025/KW3KW4/GearXChange/pages/components/listingcard.vue";
+import listingcard from "~/pages/components/listingcard.vue";
 
 const listings = ref<any[]>([]);
 const loading = ref(true);
@@ -80,16 +80,10 @@ async function toggleFavourite(listingId: number) {
   }
 }
 
-let refreshIntervalId: any = null;
-
 onMounted(() => {
   setTimeout(getListings, 200);
-  refreshIntervalId = setInterval(getListings, 30000); // refresh listings every 30 seconds
 });
 
-onUnmounted(() => {
-  if (refreshIntervalId) clearInterval(refreshIntervalId);
-});
 </script>
 
 

@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
 	const body = await readBody<{ email: string; password: string }>(event);
 
     // Check that the thing to be verified match the required criteria
+    // Should never fail, as this is also checked in frontend, but the client may 
     const res = User.safeParse({email: body.email, password: body.password})
     if(!res.success){
         throw createError({ statusCode: 401, message: 'Invalid credentials' });
