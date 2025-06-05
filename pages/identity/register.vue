@@ -41,7 +41,7 @@
     </div>
     <div class="mb-2">
     <label class="label">
-        <input type="checkbox" v-model="loginDirectly" class="toggle" />
+        <input type="checkbox" v-model="loginDirectly"  class="checkbox checkbox-accent" />
         Log in directly?
     </label>
     </div>
@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-const loginDirectly = ref(false)
+const loginDirectly = ref(true)
 const email = ref('')
 const password = ref('')
 const loading = ref(false)

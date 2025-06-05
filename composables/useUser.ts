@@ -1,5 +1,3 @@
-import { useState, useAsyncData } from '#app'
-
 export function useUser() {
   const user = useState('user', () => null)
 
