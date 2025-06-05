@@ -1,32 +1,45 @@
-
 <script lang="ts" setup>
+import MiniSearch from 'minisearch';
+import { onMounted, ref, computed } from 'vue';
 
 const listings = ref<any[]>([]);
+const filteredListings = ref<any[]>([]);
 const loading = ref(true);
 const errorMsg = ref("");
 
+const searchQuery = ref("");
+const miniSearch = new MiniSearch({
+  fields: ['title', 'description', 'make', 'model', 'location', 'vehicle_type'],
+  storeFields: ['id', 'title', 'description', 'make', 'model', 'location', 'vehicle_type'],
+  searchOptions: {
+    prefix: true,
+    fuzzy: 0.2,
+  },
+});
+
 const favouriteIds = ref<Set<number>>(new Set());
 const favouriteError = ref("");
-
 
 async function getListings() {
   loading.value = true;
   errorMsg.value = "";
   try {
-    // Fetch listings from Nuxt API
     const res = await fetch("/api/listings");
     const rawListings = await res.json();
     if (Array.isArray(rawListings)) {
       listings.value = rawListings;
+      miniSearch.removeAll();
+      miniSearch.addAll(rawListings);
+      filteredListings.value = rawListings;
     } else {
       listings.value = [];
+      filteredListings.value = [];
       errorMsg.value = "Unexpected data format from server.";
     }
-    // Fetch favourites after listings
+
     const favRes = await fetch("/api/favourites");
     const favs = await favRes.json();
     if (Array.isArray(favs)) {
-      // Favourites API returns joined objects, so support both {id} and {machinery_listings: {id}}
       favouriteIds.value = new Set(
         favs.map((f: any) => f.id ?? f.machinery_listings?.id).filter((id: any) => id != null).map(Number)
       );
@@ -35,17 +48,27 @@ async function getListings() {
     }
   } catch (error) {
     listings.value = [];
+    filteredListings.value = [];
     errorMsg.value = "Failed to fetch listings.";
   } finally {
     loading.value = false;
   }
 }
 
+watch(searchQuery, (query) => {
+  if (!query) {
+    filteredListings.value = listings.value;
+  } else {
+    const results = miniSearch.search(query);
+    filteredListings.value = results
+      .map(r => listings.value.find(l => l.id === r.id))
+      .filter(Boolean);
+  }
+});
 
 async function toggleFavourite(listingId: number) {
   try {
     if (favouriteIds.value.has(listingId)) {
-      // Remove favourite
       const res = await fetch("/api/favourites", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -54,7 +77,6 @@ async function toggleFavourite(listingId: number) {
       if (!res.ok) throw new Error(await res.text());
       favouriteIds.value.delete(listingId);
     } else {
-      // Add favourite
       const res = await fetch("/api/favourites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,14 +85,13 @@ async function toggleFavourite(listingId: number) {
       if (!res.ok) throw new Error(await res.text());
       favouriteIds.value.add(listingId);
     }
-    // Force update
     favouriteIds.value = new Set(favouriteIds.value);
     favouriteError.value = "";
   } catch (e: any) {
     console.error("Failed to toggle favourite:", e);
     if (typeof e === "string" && e.includes('Not authenticated')) {
       favouriteError.value = "You must be logged in to add favourites.";
-    } else if (e && typeof e.message === "string" && e.message.includes('Not authenticated')) {
+    } else if (e?.message?.includes('Not authenticated')) {
       favouriteError.value = "You must be logged in to add favourites.";
     } else {
       favouriteError.value = "Failed to update favourite. Please try again.";
@@ -82,22 +103,35 @@ async function toggleFavourite(listingId: number) {
 onMounted(() => {
   setTimeout(getListings, 200);
 });
-
 </script>
-
 
 <template>
   <main>
     <!-- Hero Section -->
     <section class="hero min-h-[25vh] bg-base-300 w-ful relative">
-      <div class="hero-content flex-col text-cente">
+      <div class="hero-content flex-col text-center">
+        <button class="btn btn-primary btn-lg absolute top-5 left-5" @click="getListings">
+          Refresh Listings
+        </button>
         <div>
-          <button class="btn btn-primary btn-lg absolute top-5 left-5" @click="getListings">
-            Refresh Listings
-          </button>
           <h1 class="text-5xl font-bold mb-4">GearXChange</h1>
           <p class="py-2 text-lg mb-6">Buy, sell, or rent heavy machinery with ease.</p>
-          
+          <!-- Search Bar -->
+            <label class="input">
+                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <g
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                    stroke-width="2.5"
+                    fill="none"
+                    stroke="currentColor"
+                    >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                    </g>
+                </svg>
+                <input type="search" class="grow" placeholder="Search" v-model="searchQuery" />
+            </label>
         </div>
       </div>
     </section>
@@ -105,16 +139,14 @@ onMounted(() => {
     <!-- Favourites Listings (if any) -->
     <section v-if="favouriteIds.size > 0" class="favourites-listings py-8 bg-base-200">
       <h2 class="text-3xl font-bold mb-6 text-center">Your Favourites</h2>
-      <div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
-          <listingcard
-            v-for="listing in listings.filter(l => favouriteIds.has(Number(l.id)))"
-            :key="'fav-' + listing.id"
-            :listing="listing"
-            :isFavourite="true"
-            :onToggleFavourite="toggleFavourite"
-            />
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
+        <listingcard
+          v-for="listing in filteredListings.filter(l => favouriteIds.has(Number(l.id)))"
+          :key="'fav-' + listing.id"
+          :listing="listing"
+          :isFavourite="true"
+          :onToggleFavourite="toggleFavourite"
+        />
       </div>
     </section>
 
@@ -126,22 +158,22 @@ onMounted(() => {
       </div>
       <div v-else-if="errorMsg" class="alert alert-error w-fit mx-auto">{{ errorMsg }}</div>
       <div v-else>
-        <div v-if="listings.length > 0">
+        <div v-if="filteredListings.length > 0">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
             <listingcard
-                v-for="listing in listings.slice(0, 9)"
-                :key="listing.id"
-                :listing="listing"
-                :isFavourite="favouriteIds.has(Number(listing.id))"
-                :onToggleFavourite="toggleFavourite"
-                />
+              v-for="listing in filteredListings.slice(0, 9)"
+              :key="listing.id"
+              :listing="listing"
+              :isFavourite="favouriteIds.has(Number(listing.id))"
+              :onToggleFavourite="toggleFavourite"
+            />
           </div>
         </div>
-        <p v-else class="text-center text-lg mt-8">No listings available. Be the first to add your machine!</p>
+        <p v-else class="text-center text-lg mt-8">No listings match your search.</p>
       </div>
     </section>
 
-    <!-- DaisyUI toast for favourite error (use v-show for animation) -->
+    <!-- DaisyUI toast for favourite error -->
     <div class="toast toast-end z-50" v-show="favouriteError">
       <div class="alert alert-error">
         <span>{{ favouriteError }}</span>

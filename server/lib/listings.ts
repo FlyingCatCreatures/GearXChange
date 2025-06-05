@@ -7,12 +7,7 @@ export async function createListing(listing: Omit<InferSelectModel<typeof machin
 }
 
 export async function getListings(ordering: string = "views_desc") {
-  let orderBy;
-  if (ordering === "price_asc") orderBy = asc(machineryListingsTable.price);
-  else if (ordering === "price_desc") orderBy = desc(machineryListingsTable.price);
-  else if (ordering === "date_desc") orderBy = desc(machineryListingsTable.created_at);
-  else orderBy = desc(machineryListingsTable.views);
-  return await db.select().from(machineryListingsTable).orderBy(orderBy);
+  return await db.select().from(machineryListingsTable);
 }
 
 export async function addFavourite(user_id: number, listing_id: number) {
