@@ -96,8 +96,7 @@ function logout() {
             </div>
           </div>
           <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-            <li><router-link to="/prof">Profile</router-link></li>
-            <li><router-link to="/sett">Settings</router-link></li>
+            <li><router-link to="/profile">Profile</router-link></li>
             <li><a @click="logout">Logout</a></li>
           </ul>
         </template>
