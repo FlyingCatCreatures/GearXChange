@@ -1,6 +1,5 @@
 
 <script lang="ts" setup>
-import listingcard from "~/pages/components/listingcard.vue";
 
 const listings = ref<any[]>([]);
 const loading = ref(true);

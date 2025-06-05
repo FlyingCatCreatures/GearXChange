@@ -1,18 +1,17 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-/* Some animation for the listing opening */
-@keyframes scale-in {
-  from {
+@theme {
+  --animate-scale-in: scale-in 0.3s ease-out;
+
+  @keyframes scale-in {
+  0% {
     transform: scale(0.9);
     opacity: 0;
   }
-  to {
+  100% {
     transform: scale(1);
     opacity: 1;
   }
 }
-
-.animate-scale-in {
-  animation: scale-in 0.3s ease-out;
 }
