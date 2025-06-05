@@ -64,7 +64,7 @@ watch(showDetails, (visible) => {
     </div>
 
     <!-- FULLSCREEN MODAL -->
-    <div v-if="showDetails" class="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4">
+    <div v-if="showDetails" class="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4"   @click.self="showDetails = false">
     <div class="bg-base-100 w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl relative animate-scale-in">
         <button class="btn btn-sm btn-circle absolute top-4 right-4 z-10" @click="showDetails = false">✕</button>
 
