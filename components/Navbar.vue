@@ -55,7 +55,7 @@ function logout() {
     <div class="flex-1">
       <router-link
         to="/"
-        class="btn text-xl"
+        class="btn text-xl mr-1"
         :class="$route.path === '/' ? 'btn-primary' : 'btn-ghost'"
       >Home</router-link>
       <router-link
