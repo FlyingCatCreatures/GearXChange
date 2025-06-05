@@ -25,7 +25,6 @@ export const sessionTable = sqliteTable("session", {
 });
 
 
-
 export type User = InferSelectModel<typeof userTable>;
 export type Session = InferSelectModel<typeof sessionTable>
 
@@ -58,4 +57,17 @@ export const favouriteListingsTable = sqliteTable("favourite_listings", {
   created_at: text("created_at").default("(datetime('now'))"),
 });
 
+export const biddingsTable = sqliteTable("biddings", {
+  number: integer("number").primaryKey(),
+  amount_bid: integer("amount").notNull(),
+  user_id: text("user_id")
+    .notNull()
+    .references(() => userTable.id),
+  listing_id: text("listing_id")
+    .notNull()
+    .references(() => machineryListingsTable.id),
+  expiresAt: integer("expires_at", {
+    mode: "timestamp"
+  }).notNull()
+});
 // --- HELPERS ---

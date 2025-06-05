@@ -51,6 +51,18 @@ export default defineNitroPlugin(async () => {
     )
   `);
 
+    db.run(`
+    CREATE TABLE IF NOT EXISTS biddings (
+      number TEXT PRIMARY KEY,
+      amount INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      listing_id INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      FOREIGN KEY(listing_id) REFERENCES machinery_listings(id),
+      FOREIGN KEY(user_id) REFERENCES user(id)
+    )
+  `);
+
   // Insert default users if not present
   await db.insert(userTable).values([
     { id: 1, email: 'john.doe@agritech.com', hashedPassword: 'hashedpassword1', name:"john" },
