@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 
-const user = useUser()
+// This caused desyncing issues, so we just call the api directly instead of assigning like this
+// const user = useUser()
+useUser()
+let res = (await (await fetch("api/me")).json())
+let user = ref(res)
 const form = ref({
   email: user.value && typeof user.value === 'object' && 'email' in user.value ? (user.value as any).email : '',
   password: '',
@@ -31,6 +35,7 @@ async function saveProfile() {
       body: {
         email: form.value.email,
         password: form.value.password || undefined,
+        location: form.value.location,
       },
     })
     if (res && res.success) {

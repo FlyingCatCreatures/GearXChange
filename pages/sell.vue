@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { User } from '~/server/lib/db';
+
 const title = ref("");
 const price = ref<number | null>(null);
 const priceType = ref("fixed");
@@ -98,7 +100,8 @@ function resetForm() {
   price.value = null;
   priceType.value = "fixed";
   condition.value = "new";
-  location.value = "";
+  const user = useUser() as Ref<User | null>;
+  location.value = user.value?.location ?? '';
   description.value = "";
   make.value = "";
   model.value = "";

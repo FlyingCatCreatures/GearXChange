@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
 	const token = getCookie(event, "session");
 	if (!token) return;
 
-	const result = await validateSessionToken(token);
+    const result = await validateSessionToken(token);
 	if (result.session && result.user) {
 		event.context.user = result.user;
 	}

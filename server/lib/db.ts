@@ -12,7 +12,8 @@ export const userTable = sqliteTable("user", {
   id: integer("id").primaryKey(),
   name: text("name").notNull().unique(),
   email: text("email").notNull().unique(),
-  hashedPassword: text("hashed_password").notNull()
+  hashedPassword: text("hashed_password").notNull(),
+  location: text("location")
 });
 
 export const sessionTable = sqliteTable("session", {

@@ -1,12 +1,13 @@
 import { db, sessionTable, userTable } from '~/server/lib/db';
 import { eq } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
-import { z } from 'zod/v4';
+import { z} from 'zod/v4';
 import { getUserIdFromSession } from '~/server/lib/session';
 
 const UpdateUser = z.object({
-  email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
+  email: z.email().optional(),
+  location: z.union([z.string(), z.null(), z.string().optional()]),
+  password: z.union([z.string().optional(), z.string().min(8)]), // Optional, but if it does exist it must be 8 characters
 });
 
 export default defineEventHandler(async (event) => {
@@ -26,7 +27,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'User not found' });
   }
 
-  const body = await readBody<{ email?: string; password?: string }>(event);
+  const body = await readBody<{ email?: string; password?: string ; location?: string }>(event);
   const res = UpdateUser.safeParse(body);
   if (!res.success) {
     throw createError({ statusCode: 400, message: 'Invalid input' });
@@ -39,11 +40,17 @@ export default defineEventHandler(async (event) => {
     updates.email = body.email;
   }
 
-  // Only update password if provided
+  // Only update password if provided and different
   if (body.password) {
     updates.hashedPassword = await hash(body.password, 10);
   }
 
+  // Only update location if provided and different or not yet set
+  if (body.location && user.location !==body.location) {
+    updates.location = body.location;
+  }
+
+  console.log(updates)
   if (Object.keys(updates).length === 0) {
     return { success: true, message: 'No changes made.' };
   }
