@@ -47,11 +47,31 @@ export async function incrementListingViews(listing_id: number) {
 }
 
 export async function placeBid(listing_id: number, amount: number, user_id: number) {
-  await db.insert(biddingsTable).values({
-    user_id: String(user_id),
-    listing_id: String(listing_id), 
-    amount_bid: amount,
-  });
+    const existing = await db
+        .select()
+        .from(biddingsTable)
+        .where(and(
+        eq(biddingsTable.user_id, String(user_id)),
+        eq(biddingsTable.listing_id, String(listing_id))
+        ));
+
+    // if the user has already placed at least a bid on this listing we update that bid instead of making one
+    if (existing.length > 0) {
+        await db
+        .update(biddingsTable)
+        .set({ amount_bid: amount })
+        .where(and(
+            eq(biddingsTable.user_id, String(user_id)),
+            eq(biddingsTable.listing_id, String(listing_id))
+        ));
+    } else {
+        // Otherwise just make a new bid
+        await db.insert(biddingsTable).values({
+        user_id: String(user_id),
+        listing_id: String(listing_id), 
+        amount_bid: amount,
+        });
+    }
 }
 
 

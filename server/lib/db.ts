@@ -3,6 +3,7 @@ import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 
 import type { InferSelectModel } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 const sqliteDB = sqlite(":memory:");
 export const db = drizzle(sqliteDB);
@@ -46,7 +47,7 @@ export const machineryListingsTable = sqliteTable("machinery_listings", {
   weight: integer("weight"),
   views: integer("views").default(0),
   user_id: integer("user_id").notNull(),
-  created_at: text("created_at").default("(datetime('now'))"),
+  created_at: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // --- FAVOURITE LISTINGS TABLE ---

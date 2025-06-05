@@ -26,7 +26,7 @@ watch(showDetails, (visible) => {
 const topBids = computed(() => {
   return biddings.value
     .sort((a, b) => b.amount_bid - a.amount_bid)
-    .slice(0, 5); // top 5
+    .slice(0, 3); // top 3 bids get displayed
 });
 
 const loading = ref(false)
@@ -165,7 +165,16 @@ async function submitBid() {
         <p class="text-base leading-relaxed whitespace-pre-wrap">{{ listing.description }}</p>
       </div>
 
-      <p class="text-sm text-gray-500 mt-6">Listed on: {{ new Date(listing.created_at).toLocaleDateString() }}</p>
+    <p class="text-sm text-gray-500 mt-6">
+    Listed on:
+    <!-- 
+      JS date doesn't take dates of the form "YYYY-MM-DD HH:MM:SS", the SQL standard
+      It does however take dates of the form "YYYY-MM-DDTHH:MM:SS", so we just replace the space with a T
+    -->
+    {{
+        new Date(listing.created_at.replace(' ', 'T')).toLocaleDateString()
+    }}
+    </p>
     </div>
 
     <!-- Bidding section -->
@@ -176,7 +185,7 @@ async function submitBid() {
         <input
             v-model.number="bidAmount"
             type="number"
-            min="1"
+            :min="topBids.length ? topBids[0].amount_bid + 1 : 1"
             class="input input-bordered w-full max-w-xs"
             placeholder="Enter your bid amount"
             required
