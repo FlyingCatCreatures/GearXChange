@@ -2,8 +2,8 @@
 const theme = ref('light');
 
 
-type User = globalThis.Ref<{id: string, email: string, hashedPassword: string} | null>
-const user: User = useUser()
+const user = await useUser()
+
 const isLoggedIn = computed(() => !!user.value)
 
 const { toastMessage, showToast, triggerToast } = useToast()
