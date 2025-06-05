@@ -1,4 +1,4 @@
-import { db, machineryListingsTable, favouriteListingsTable , biddingsTable} from './db';
+import { db, machineryListingsTable, favouriteListingsTable , biddingsTable, userTable} from './db';
 import { eq, desc, asc, and, sql } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
 
@@ -47,13 +47,22 @@ export async function incrementListingViews(listing_id: number) {
 }
 
 export async function placeBid(listing_id: number, amount: number, user_id: number) {
-  await db.update(machineryListingsTable)
-    .set({
-        views: sql`${machineryListingsTable.views} + 1`,
-    })
-    .where(eq(machineryListingsTable.id, listing_id));
+  await db.insert(biddingsTable).values({
+    user_id: String(user_id),
+    listing_id: String(listing_id), 
+    amount_bid: amount,
+  });
 }
 
-export async function getBiddings() {
-  return await db.select().from(biddingsTable);
+
+export async function getBiddings(listing_id: string | null) {
+    if (listing_id=='') return;
+    return await db
+        .select({
+        amount_bid: biddingsTable.amount_bid,
+        username: userTable.name, 
+        })
+        .from(biddingsTable)
+        .where(eq(biddingsTable.listing_id, String(listing_id)))
+        .innerJoin(userTable, eq(biddingsTable.user_id, userTable.id));
 }

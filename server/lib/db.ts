@@ -65,9 +65,6 @@ export const biddingsTable = sqliteTable("biddings", {
     .references(() => userTable.id),
   listing_id: text("listing_id")
     .notNull()
-    .references(() => machineryListingsTable.id),
-  expiresAt: integer("expires_at", {
-    mode: "timestamp"
-  }).notNull()
+    .references(() => machineryListingsTable.id)
 });
 // --- HELPERS ---

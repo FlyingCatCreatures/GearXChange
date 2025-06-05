@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, watch, ref } from 'vue';
 
 const props = defineProps<{
   listing: any;
@@ -19,8 +19,79 @@ watch(showDetails, (visible) => {
         body: JSON.stringify({ listing_id: props.listing.id }),
     });
 
+    getBiddings();
   }
 });
+
+const topBids = computed(() => {
+  return biddings.value
+    .sort((a, b) => b.amount_bid - a.amount_bid)
+    .slice(0, 5); // top 5
+});
+
+const loading = ref(false)
+const errorMsg = ref('')
+const biddings = ref<any[]>([]);
+
+async function getBiddings() {
+  loading.value = true;
+  errorMsg.value = "";
+  try {
+    // Fetch biddings from Nuxt API
+    const res = await $fetch(`/api/biddings?listing_id=${props.listing.id}`);
+
+    const rawListings = res;
+    console.log(res);
+    if (Array.isArray(rawListings)) {
+      biddings.value = rawListings;
+    } else {
+      biddings.value = [];
+      errorMsg.value = "Unexpected data format from server.";
+    }
+  } catch (error) {
+    biddings.value = [];
+    console.log("Failed to fetch biddings")
+    errorMsg.value = "Failed to fetch biddings.";
+  } finally {
+    loading.value = false;
+  }
+}
+
+const bidAmount = ref<number | null>(null);
+const bidError = ref('');
+const bidSuccess = ref(false);
+
+async function submitBid() {
+  bidError.value = '';
+  bidSuccess.value = false;
+
+  if (!bidAmount.value || bidAmount.value <= 0) {
+    bidError.value = "Please enter a valid bid amount.";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/biddings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        listing_id: props.listing.id,
+        amount: bidAmount.value,
+      }),
+    });
+    const data = await response.json();
+    if (data.error) {
+      bidError.value = data.error;
+    } else {
+      bidSuccess.value = true;
+      bidAmount.value = null;
+      getBiddings(); // Refresh bidding list
+    }
+  } catch (err) {
+    bidError.value = "Failed to place bid.";
+  }
+}
+
 </script>
 
 
@@ -95,6 +166,34 @@ watch(showDetails, (visible) => {
       </div>
 
       <p class="text-sm text-gray-500 mt-6">Listed on: {{ new Date(listing.created_at).toLocaleDateString() }}</p>
+    </div>
+
+    <!-- Bidding section -->
+    <div class="px-6 pb-6 space-y-2">
+    <h3 class="text-xl font-semibold">Place a Bid</h3>
+    <form @submit.prevent="submitBid">
+        <div class="flex items-center gap-2">
+        <input
+            v-model.number="bidAmount"
+            type="number"
+            min="1"
+            class="input input-bordered w-full max-w-xs"
+            placeholder="Enter your bid amount"
+            required
+        />
+        <button type="submit" class="btn btn-primary">Place Bid</button>
+        </div>
+        <p v-if="bidError" class="text-error text-sm mt-1">{{ bidError }}</p>
+        <p v-if="bidSuccess" class="text-success text-sm mt-1">Bid placed!</p>
+    </form>
+    <div v-if="topBids.length" class="pt-4">
+      <h3 class="text-lg font-semibold mb-2">Top Bids</h3>
+        <ul class="space-y-1 text-base">
+            <li v-for="bid in topBids">
+                {{ bid.amount_bid }} € by {{ bid.username }}
+            </li>
+        </ul>
+    </div>
     </div>
 
     <!-- image section -->
