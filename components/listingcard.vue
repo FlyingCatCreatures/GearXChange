@@ -4,7 +4,7 @@ import { computed, watch, ref } from 'vue';
 const props = defineProps<{
   listing: any;
   isFavourite: boolean;
-  onToggleFavourite: (id: number) => void;
+  onToggleFavourite: (id: string) => void;
 }>();
 
 const showDetails = ref(false);
@@ -105,7 +105,7 @@ async function submitBid() {
       <!-- Star button -->
       <button
         class="btn btn-ghost btn-s btn-circle absolute top-2 right-2 z-10"
-        @click.stop="onToggleFavourite(Number(listing.id))"
+        @click.stop="onToggleFavourite((listing.id))"
         :aria-label="isFavourite ? 'Remove from favourites' : 'Add to favourites'"
       >
         <svg v-if="isFavourite" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-warning fill-warning" viewBox="0 0 24 24">

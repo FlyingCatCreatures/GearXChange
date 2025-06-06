@@ -5,7 +5,7 @@ const listings = ref<any[]>([]);
 const loading = ref(true);
 const errorMsg = ref("");
 
-const favouriteIds = ref<Set<number>>(new Set());
+const favouriteIds = ref<Set<string>>(new Set());
 const favouriteError = ref("");
 
 
@@ -28,7 +28,7 @@ async function getListings() {
     if (Array.isArray(favs)) {
       // Favourites API returns joined objects, so support both {id} and {machinery_listings: {id}}
       favouriteIds.value = new Set(
-        favs.map((f: any) => f.id ?? f.machinery_listings?.id).filter((id: any) => id != null).map(Number)
+        favs.map((f: any) => f.id ?? f.machinery_listings?.id).filter((id: any) => id != null)
       );
     } else {
       favouriteIds.value = new Set();
@@ -42,7 +42,7 @@ async function getListings() {
 }
 
 
-async function toggleFavourite(listingId: number) {
+async function toggleFavourite(listingId: string) {
   try {
     if (favouriteIds.value.has(listingId)) {
       // Remove favourite
@@ -108,7 +108,7 @@ onMounted(() => {
       <div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4 md:px-8">
           <listingcard
-            v-for="listing in listings.filter(l => favouriteIds.has(Number(l.id)))"
+            v-for="listing in listings.filter(l => favouriteIds.has((l.id)))"
             :key="'fav-' + listing.id"
             :listing="listing"
             :isFavourite="true"
@@ -132,7 +132,7 @@ onMounted(() => {
                 v-for="listing in listings.slice(0, 9)"
                 :key="listing.id"
                 :listing="listing"
-                :isFavourite="favouriteIds.has(Number(listing.id))"
+                :isFavourite="favouriteIds.has(listing.id)"
                 :onToggleFavourite="toggleFavourite"
                 />
           </div>
