@@ -42,6 +42,8 @@
 </template>
 
 <script setup lang="ts">
+import { SyncUser } from '~/middleware/auth.global';
+
 const loading = ref(false)
 const error = ref('')
 
@@ -53,7 +55,7 @@ async function login(e: Event) {
 		await $fetch("/api/login", {
 			method: "POST",
 			body: new FormData(e.target as HTMLFormElement)
-		});
+		}).then(SyncUser);
 
         useToast().triggerToast("Logged in successfully")
 		await navigateTo("/")

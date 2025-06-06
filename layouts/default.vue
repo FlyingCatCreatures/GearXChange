@@ -16,7 +16,7 @@ onMounted(() => {
     SyncUser(); 
     intervalId = setInterval(() => {
       SyncUser(); // Sync user state again periodically
-    }, 100); 
+    }, 1000*10); // 10 second delay between resyncs as we're attempting to have it desync rarely if ever
   });
 });
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { User } from '~/server/utils/db';
+import { SyncUser } from '~/middleware/auth.global';
 
 const title = ref("");
 const price = ref<number | null>(null);
@@ -82,7 +82,7 @@ async function handleCreateListing() {
         fuel_or_power: fuelOrPower.value.trim(),
         weight: weight.value,
       },
-    });
+    }).then(SyncUser);
 
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";

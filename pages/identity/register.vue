@@ -67,6 +67,7 @@ const error = ref('')
 const name = ref('')
 
 import { z } from "zod/v4"; 
+import { SyncUser } from "~/middleware/auth.global"
 const User = z.object({ 
   email: z.email(),
   name: z.string(),
@@ -98,7 +99,7 @@ async function handleSignup(e: Event) {
     await $fetch('/api/signup', {
       method: 'POST',
       body: formData
-    });
+    }).then(SyncUser);;
     useToast().triggerToast("Signed up and Logged in successfully")
     navigateTo('/') // Go to home page after either signing up
 

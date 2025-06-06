@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { SyncUser } from '~/middleware/auth.global'
 
 // This caused desyncing issues, so we just call the api directly instead of assigning like this
 const user = await useUser()
@@ -28,20 +29,24 @@ async function saveProfile() {
   }
   loading.value = true
   try {
-    const res = await $fetch<{ success?: boolean; message?: string }>('/api/update-credentials', {
+    const res = $fetch<{ success?: boolean; message?: string }>('/api/update-credentials', {
       method: 'POST',
       body: {
+        name: form.value.name,
         email: form.value.email,
         password: form.value.password || undefined,
         location: form.value.location,
       },
     })
-    if (res && res.success) {
+    res.then(SyncUser);
+    const resAwaited = await res;
+
+    if (resAwaited && resAwaited.success) {
       successMsg.value = 'Profile updated successfully.'
       form.value.password = ''
       form.value.confirm = ''
     } else {
-      errorMsg.value = res?.message || 'Failed to update profile.'
+      errorMsg.value = resAwaited?.message || 'Failed to update profile.'
     }
   } catch (e: any) {
     errorMsg.value = e?.data?.message || 'Failed to update profile.'

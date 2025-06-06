@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { SyncUser } from '~/middleware/auth.global';
+
 const theme = ref('light');
 
 
-const user = await useUser()
+const user = useUser()
 
 const isLoggedIn = computed(() => !!user.value)
 
@@ -19,7 +21,6 @@ function toggleTheme() {
 }
 
 onMounted(() => {
-  //fetchUserState();
   const savedTheme = localStorage.getItem('theme');
   
   if (savedTheme) {
@@ -34,7 +35,7 @@ onMounted(() => {
 async function logout() {
 	await $fetch("/api/logout", {
 		method: "POST"
-	});
+	}).then(SyncUser);
     useToast().triggerToast("Logged out successfully")
 	await navigateTo("/");
 }
