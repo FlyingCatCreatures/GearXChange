@@ -1,4 +1,4 @@
-import { incrementListingViews } from '../utils/listings';
+import { incrementListingViews } from "../utils/listings";
 // import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {
@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const { listing_id } = body;
 
   if (!listing_id) {
-    throw createError({ statusCode: 400, message: 'Missing listing_id' });
+    throw createError({ statusCode: 400, message: "Missing listing_id" });
   }
 
   await incrementListingViews(listing_id);

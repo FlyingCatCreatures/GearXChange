@@ -17,19 +17,17 @@ export const userTable = sqliteTable("user", {
   name: text("name").notNull().unique(),
   email: text("email").notNull().unique(),
   hashedPassword: text("hashed_password").notNull(),
-  location: text("location")
+  location: text("location"),
 });
 
 export const sessionTable = sqliteTable("session", {
-	id: text("id").primaryKey(),
-	userId: text("user_id")
-		.notNull(),
-	expiresAt: integer("expires_at").notNull()
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  expiresAt: integer("expires_at").notNull(),
 });
 
-
 export type User = InferSelectModel<typeof userTable>;
-export type Session = InferSelectModel<typeof sessionTable>
+export type Session = InferSelectModel<typeof sessionTable>;
 
 // --- MACHINERY LISTINGS TABLE ---
 export const machineryListingsTable = sqliteTable("machinery_listings", {
@@ -63,11 +61,8 @@ export const favouriteListingsTable = sqliteTable("favourite_listings", {
 export const biddingsTable = sqliteTable("biddings", {
   number: integer("number").primaryKey(),
   amount_bid: integer("amount").notNull(),
-  user_id: text("user_id")
-    .notNull(),
-  listing_id: text("listing_id")
-    .notNull()
+  user_id: text("user_id").notNull(),
+  listing_id: text("listing_id").notNull(),
 });
 // --- HELPERS ---
-export const adapter = new DrizzleSQLiteAdapter(db , sessionTable, userTable);
-
+export const adapter = new DrizzleSQLiteAdapter(db, sessionTable, userTable);

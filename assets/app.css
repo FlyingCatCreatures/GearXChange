@@ -5,13 +5,13 @@
   --animate-scale-in: scale-in 0.3s ease-out;
 
   @keyframes scale-in {
-  0% {
-    transform: scale(0.9);
-    opacity: 0;
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 }

@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import { SyncUser } from '~/middleware/auth.global';
+import { SyncUser } from "~/middleware/auth.global";
 
 const title = ref("");
 const price = ref<number | null>(null);
 const priceType = ref("fixed");
 const condition = ref("new");
-const location = ref(((await useUser()).value as unknown as { location?: string })?.location ?? '');
+const location = ref(
+  ((await useUser()).value as unknown as { location?: string })?.location ?? "",
+);
 const description = ref("");
 const make = ref("");
 const model = ref("");
@@ -61,10 +63,12 @@ async function fileToBase64(file: any): Promise<string> {
 
 async function handleCreateListing() {
   try {
-    const pictureBase64 = pictureFile.value ? await fileToBase64(pictureFile.value) : null; // Parse file into a base64 encoding of itself to store in backend
+    const pictureBase64 = pictureFile.value
+      ? await fileToBase64(pictureFile.value)
+      : null; // Parse file into a base64 encoding of itself to store in backend
 
-    await $fetch('/api/listings', {
-      method: 'POST',
+    await $fetch("/api/listings", {
+      method: "POST",
       body: {
         plate: plate.value.trim(),
         work_hours: workHours.value,
@@ -73,7 +77,7 @@ async function handleCreateListing() {
         price_type: priceType.value,
         condition: condition.value,
         location: location.value.trim(),
-        picture: pictureBase64, 
+        picture: pictureBase64,
         description: description.value.trim() || null,
         make: make.value.trim(),
         model: model.value.trim(),
@@ -82,7 +86,12 @@ async function handleCreateListing() {
         fuel_or_power: fuelOrPower.value.trim(),
         weight: weight.value,
       },
-    }).then(SyncUser);
+    })
+      // We're changing userstate with this server invocation,
+      // which means we want to update the reference the useUser() function returns throughout various files and components
+      // The SyncUser command does that, to prevent desyncing the server's userstate and the client's
+      // For more information see /composables/useUser.ts and /middleware/auth.global.ts
+      .then(SyncUser);
 
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";
@@ -96,12 +105,11 @@ async function handleCreateListing() {
 }
 
 function formatPlateInput(raw: string): string {
-
-  let cleaned = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-  let formatted = '';
+  let cleaned = raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  let formatted = "";
   if (cleaned.length > 0) formatted += cleaned.slice(0, 2);
-  if (cleaned.length > 2) formatted += '-' + cleaned.slice(2, 5);
-  if (cleaned.length > 5) formatted += '-' + cleaned.slice(5, 6);
+  if (cleaned.length > 2) formatted += "-" + cleaned.slice(2, 5);
+  if (cleaned.length > 5) formatted += "-" + cleaned.slice(5, 6);
   return formatted;
 }
 
@@ -112,7 +120,9 @@ async function resetForm() {
   price.value = null;
   priceType.value = "fixed";
   condition.value = "new";
-  location.value = ((await useUser()).value as unknown as { location?: string })?.location ?? '';
+  location.value =
+    ((await useUser()).value as unknown as { location?: string })?.location ??
+    ""; // This might be set in the users preferences in case we use this as default value
   description.value = "";
   make.value = "";
   model.value = "";
@@ -131,7 +141,9 @@ async function resetForm() {
   <div class="sell-page max-w-xl mx-auto p-6">
     <div v-if="!stepTwo" class="step1">
       <h1 class="text-2xl font-semibold mb-4">Fill in your license plate</h1>
-      <div v-if="errorMessage" class="error text-red-600 mb-2">{{ errorMessage }}</div>
+      <div v-if="errorMessage" class="error text-red-600 mb-2">
+        {{ errorMessage }}
+      </div>
       <div class="form-field mb-4">
         <label for="plate" class="block font-medium mb-1">License Plate:</label>
         <input
@@ -145,7 +157,9 @@ async function resetForm() {
         />
       </div>
       <div class="form-field mb-6">
-        <label for="workHours" class="block font-medium mb-1">Work hours:</label>
+        <label for="workHours" class="block font-medium mb-1"
+          >Work hours:</label
+        >
         <input
           id="workHours"
           v-model.number="workHours"
@@ -155,12 +169,7 @@ async function resetForm() {
           class="input input-bordered w-full"
         />
       </div>
-      <button
-        @click="goToStep2"
-        class="btn btn-primary"
-      >
-        Create listing
-      </button>
+      <button @click="goToStep2" class="btn btn-primary">Create listing</button>
     </div>
 
     <div v-else class="step2">
@@ -169,8 +178,12 @@ async function resetForm() {
         <span class="font-medium">License Plate:</span> {{ plate }}<br />
         <span class="font-medium">Work Hours:</span> {{ workHours }} h
       </div>
-      <div v-if="successMessage" class="success text-green-600 mb-2">{{ successMessage }}</div>
-      <div v-if="errorMessage" class="error text-red-600 mb-2">{{ errorMessage }}</div>
+      <div v-if="successMessage" class="success text-green-600 mb-2">
+        {{ successMessage }}
+      </div>
+      <div v-if="errorMessage" class="error text-red-600 mb-2">
+        {{ errorMessage }}
+      </div>
       <form @submit.prevent="handleCreateListing" class="sell-form space-y-4">
         <div class="form-field">
           <label for="title" class="block font-medium mb-1">Title:</label>
@@ -194,7 +207,9 @@ async function resetForm() {
             />
           </div>
           <div class="form-field">
-            <label for="priceType" class="block font-medium mb-1">Price Type:</label>
+            <label for="priceType" class="block font-medium mb-1"
+              >Price Type:</label
+            >
             <select
               id="priceType"
               v-model="priceType"
@@ -208,7 +223,9 @@ async function resetForm() {
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="form-field">
-            <label for="condition" class="block font-medium mb-1">Condition:</label>
+            <label for="condition" class="block font-medium mb-1"
+              >Condition:</label
+            >
             <select
               id="condition"
               v-model="condition"
@@ -221,7 +238,9 @@ async function resetForm() {
             </select>
           </div>
           <div class="form-field">
-            <label for="location" class="block font-medium mb-1">Location:</label>
+            <label for="location" class="block font-medium mb-1"
+              >Location:</label
+            >
             <input
               id="location"
               v-model="location"
@@ -232,7 +251,9 @@ async function resetForm() {
           </div>
         </div>
         <div class="form-field mb-4">
-          <label for="pictureFile" class="block font-medium mb-1">Upload Picture:</label>
+          <label for="pictureFile" class="block font-medium mb-1"
+            >Upload Picture:</label
+          >
           <label class="btn btn-outline w-full cursor-pointer">
             Choose File
             <input
@@ -254,7 +275,9 @@ async function resetForm() {
           />
         </div>
         <div class="form-field">
-          <label for="description" class="block font-medium mb-1">Description:</label>
+          <label for="description" class="block font-medium mb-1"
+            >Description:</label
+          >
           <textarea
             id="description"
             v-model="description"
@@ -286,7 +309,9 @@ async function resetForm() {
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="form-field">
-            <label for="vehicleType" class="block font-medium mb-1">Vehicle Type:</label>
+            <label for="vehicleType" class="block font-medium mb-1"
+              >Vehicle Type:</label
+            >
             <input
               id="vehicleType"
               v-model="vehicleType"
@@ -296,7 +321,9 @@ async function resetForm() {
             />
           </div>
           <div class="form-field">
-            <label for="yearOfManufacture" class="block font-medium mb-1">Year of Manufacture:</label>
+            <label for="yearOfManufacture" class="block font-medium mb-1"
+              >Year of Manufacture:</label
+            >
             <input
               id="yearOfManufacture"
               v-model.number="yearOfManufacture"
@@ -310,7 +337,9 @@ async function resetForm() {
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="form-field">
-            <label for="fuelOrPower" class="block font-medium mb-1">Fuel or Power:</label>
+            <label for="fuelOrPower" class="block font-medium mb-1"
+              >Fuel or Power:</label
+            >
             <input
               id="fuelOrPower"
               v-model="fuelOrPower"
@@ -320,7 +349,9 @@ async function resetForm() {
             />
           </div>
           <div class="form-field">
-            <label for="weight" class="block font-medium mb-1">Weight (kg):</label>
+            <label for="weight" class="block font-medium mb-1"
+              >Weight (kg):</label
+            >
             <input
               id="weight"
               v-model.number="weight"
@@ -333,17 +364,16 @@ async function resetForm() {
         <div class="flex justify-between mt-4">
           <button
             type="button"
-            @click="stepTwo = false; errorMessage = ''; successMessage = '';"
+            @click="
+              stepTwo = false;
+              errorMessage = '';
+              successMessage = '';
+            "
             class="btn btn-ghost"
           >
             Return
           </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            Create Listing
-          </button>
+          <button type="submit" class="btn btn-primary">Create Listing</button>
         </div>
       </form>
     </div>
