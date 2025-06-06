@@ -199,7 +199,7 @@ async function submitBid() {
       <h3 class="text-lg font-semibold mb-2">Top Bids</h3>
         <ul class="space-y-1 text-base">
             <li v-for="bid in topBids">
-                {{ bid.amount_bid }} € by {{ bid.username }}
+                €{{ bid.amount_bid }} by {{ bid.username }}
             </li>
         </ul>
     </div>
