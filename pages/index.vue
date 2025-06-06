@@ -26,6 +26,7 @@ const sortedListings = computed(() => {
   if (sortOption.value === "default") { return listingsToSort; }
   else if (sortOption.value === "priceAsc") { return listingsToSort.sort((a, b) => (a.price ?? 0) - (b.price ?? 0)); } 
   else if (sortOption.value === "priceDesc") { return listingsToSort.sort((a, b) => (b.price ?? 0) - (a.price ?? 0)); }
+  else if (sortOption.value === "views") { return listingsToSort.sort((a, b) => (b.views ?? 0) - (a.views ?? 0)); }
   console.warn("other sorting than default, priceAsc, priceDesc selected")
   return listingsToSort;
 });
@@ -156,6 +157,7 @@ onMounted(() => {
         <option value="default">Default</option>
         <option value="priceAsc">Price ↑</option>
         <option value="priceDesc">Price ↓</option>
+        <option value="views">Most Viewed</option>
       </select>
       <svg
         class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-base-content pointer-events-none z-10"
