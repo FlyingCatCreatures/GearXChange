@@ -26,6 +26,10 @@ const successMessage = ref("");
 const errorMessage = ref("");
 
 function goToStep2() {
+  if (!useUser()?.value) {
+    errorMessage.value = "Must be logged in to place a listing";
+    return;
+  }
   const platePattern = /^[A-Z]{2}-[0-9]{3}-[A-Z]$/;
   if (!platePattern.test(plate.value.trim())) {
     errorMessage.value = "Please use format XX-999-X with a dash.";
@@ -67,7 +71,7 @@ async function handleCreateListing() {
       ? await fileToBase64(pictureFile.value)
       : null; // Parse file into a base64 encoding of itself to store in backend
 
-    await $fetch("/api/listings", {
+    const res = $fetch("/api/listings", {
       method: "POST",
       body: {
         plate: plate.value.trim(),
@@ -86,16 +90,21 @@ async function handleCreateListing() {
         fuel_or_power: fuelOrPower.value.trim(),
         weight: weight.value,
       },
-    })
-      // We're changing userstate with this server invocation,
-      // which means we want to update the reference the useUser() function returns throughout various files and components
-      // The SyncUser command does that, to prevent desyncing the server's userstate and the client's
-      // For more information see /composables/useUser.ts and /middleware/auth.global.ts
-      .then(SyncUser);
+    });
+    // We're changing userstate with this server invocation,
+    // which means we want to update the reference the useUser() function returns throughout various files and components
+    // The SyncUser command does that, to prevent desyncing the server's userstate and the client's
+    // For more information see /composables/useUser.ts and /middleware/auth.global.ts
+    res.then(SyncUser);
+    const resAwaited = await res;
+    if ("error" in resAwaited) {
+      useToast().triggerToast("Listing not created! You are not logged in.");
+      await resetForm();
+      return;
+    }
 
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";
-    await resetForm();
     navigateTo("/");
     useToast().triggerToast("Listing created successfully!");
     stepTwo.value = false;
