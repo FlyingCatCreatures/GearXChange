@@ -7,5 +7,16 @@ export default defineNuxtConfig({
   },
   css: ["~/assets/app.css"],
   compatibilityDate: '2025-05-15',
-  devtools: { enabled: true }
+  devtools: { enabled: true },
+  app: {
+    head: {
+      title: 'GearXChange', // default fallback title
+      htmlAttrs: {
+        lang: 'en',
+      },
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ]
+    }
+  }
 })

@@ -95,6 +95,16 @@ async function handleCreateListing() {
   }
 }
 
+function formatPlateInput(raw: string): string {
+
+  let cleaned = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  let formatted = '';
+  if (cleaned.length > 0) formatted += cleaned.slice(0, 2);
+  if (cleaned.length > 2) formatted += '-' + cleaned.slice(2, 5);
+  if (cleaned.length > 5) formatted += '-' + cleaned.slice(5, 6);
+  return formatted;
+}
+
 async function resetForm() {
   plate.value = "";
   workHours.value = null;
@@ -127,7 +137,7 @@ async function resetForm() {
         <input
           id="plate"
           v-model="plate"
-          @input="plate = plate.toUpperCase()"
+          @input="plate = formatPlateInput(plate)"
           type="text"
           maxlength="8"
           placeholder="XX-999-X"
