@@ -1,12 +1,6 @@
-export async function useUser() {
-    const user = useState('user', () => null)
-  
-    try {
-      const data = await $fetch('/api/me', { credentials: 'include' })
-      user.value = data
-    } catch {
-      user.value = null
-    }
+import type { User } from "lucia";
 
-  return user
-}
+export const useUser = () => {
+	const user = useState<User | null>("user", () => null);
+	return user;
+};

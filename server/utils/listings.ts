@@ -1,9 +1,10 @@
 import { db, machineryListingsTable, favouriteListingsTable , biddingsTable, userTable} from './db';
 import { eq, desc, asc, and, sql } from 'drizzle-orm';
 import type { InferSelectModel } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function createListing(listing: Omit<InferSelectModel<typeof machineryListingsTable>, "id" | "views" | "created_at">) {
-  await db.insert(machineryListingsTable).values(listing);
+  await db.insert(machineryListingsTable).values({id: uuidv4(), ...listing,});
 }
 
 export async function getListings(ordering: string = "views_desc") {
@@ -15,11 +16,11 @@ export async function getListings(ordering: string = "views_desc") {
   return await db.select().from(machineryListingsTable).orderBy(orderBy);
 }
 
-export async function addFavourite(user_id: number, listing_id: number) {
-  await db.insert(favouriteListingsTable).values({ user_id, listing_id });
+export async function addFavourite(user_id: string, listing_id: string) {
+  await db.insert(favouriteListingsTable).values({id: uuidv4(), user_id, listing_id });
 }
 
-export async function removeFavourite(user_id: number, listing_id: number) {
+export async function removeFavourite(user_id: string, listing_id: string) {
   await db.delete(favouriteListingsTable).where(
     and(
       eq(favouriteListingsTable.user_id, user_id),
@@ -28,7 +29,7 @@ export async function removeFavourite(user_id: number, listing_id: number) {
   );
 }
 
-export async function getFavouriteListings(user_id: number) {
+export async function getFavouriteListings(user_id: string) {
   // Join favourite_listings with machinery_listings
   return await db
     .select()
@@ -38,7 +39,7 @@ export async function getFavouriteListings(user_id: number) {
 }
 
 
-export async function incrementListingViews(listing_id: number) {
+export async function incrementListingViews(listing_id: string) {
   await db.update(machineryListingsTable)
     .set({
         views: sql`${machineryListingsTable.views} + 1`,
@@ -46,7 +47,7 @@ export async function incrementListingViews(listing_id: number) {
     .where(eq(machineryListingsTable.id, listing_id));
 }
 
-export async function placeBid(listing_id: number, amount: number, user_id: number) {
+export async function placeBid(listing_id: string, amount: number, user_id: string) {
     const existing = await db
         .select()
         .from(biddingsTable)

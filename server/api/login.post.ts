@@ -1,9 +1,9 @@
 // server/api/login.post.ts
 import { db, userTable } from '~/server/utils/db';
 import { eq } from 'drizzle-orm';
-import { compare } from 'bcryptjs';
-import { generateSessionToken, createSession } from '~/server/lib/session';
-import { setSessionTokenCookie } from '~/server/lib/cookies';
+import { verify } from "@node-rs/argon2";
+
+
 
 import { z } from "zod/v4"; 
 const User = z.object({ 
@@ -11,30 +11,45 @@ const User = z.object({
     password: z.string().min(8)
 });
 
-export default defineEventHandler(async (event) => {
-	const body = await readBody<{ email: string; password: string }>(event);
 
-    // Check that the thing to be verified match the required criteria
-    // Should never fail, as this is also checked in frontend, but the client may 
-    const res = User.safeParse({email: body.email, password: body.password})
-    if(!res.success){
-        throw createError({ statusCode: 401, message: 'Invalid credentials' });
+export default eventHandler(async (event) => {
+	const formData = await readFormData(event);
+	const email = String(formData.get("email"));
+	const password = String(formData.get("password"));
+    const res = User.safeParse({email: email, password: password})
+    if(res.error){
+        throw createError({
+			message: "Invalid input",
+			statusCode: 400
+		});
     }
 
-	const [user] = await db
-		.select()
-		.from(userTable)
-		.where(eq(userTable.email, body.email))
-		.limit(1);
+    const [existingUser] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.email, email))
+    .limit(1);
 
-	if (!user || !(await compare(body.password, user.hashedPassword))) {
-		throw createError({ statusCode: 401, message: 'Invalid credentials' });
+	if (!existingUser) {
+		throw createError({
+			message: "Incorrect username",
+			statusCode: 400
+		});
 	}
 
-	const token = generateSessionToken();
-	const session = await createSession(token, user.id);
+	const validPassword = await verify(existingUser.hashedPassword, password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
+	if (!validPassword) {
+		throw createError({
+			message: "Password",
+			statusCode: 400
+		});
+	}
 
-	setSessionTokenCookie(event, token, session.expiresAt);
-
-	return { success: true };
+	const session = await lucia.createSession(existingUser.id, {});
+	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
 });

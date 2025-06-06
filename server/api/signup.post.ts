@@ -1,8 +1,7 @@
 // server/api/signup.post.ts
 import { db, userTable } from '~/server/utils/db';
 import { generateIdFromEntropySize, UserId } from "lucia";
-import { SqliteError } from "better-sqlite3";
-import { hash } from 'bcryptjs';
+import { hash } from "@node-rs/argon2";
 import { lucia } from '../utils/auth';
 
 import { z } from "zod/v4"; 
@@ -21,50 +20,29 @@ export default defineEventHandler(async (event) => {
 	const res = User.safeParse({email: email, name: name, password: password})
 	if(res.error){
 		throw createError({
-			message: "Invalid password",
+			message: "Invalid input",
 			statusCode: 400
 		});
 	}
 
-	const passwordHash = hash(String(password), 10);
-	const userId = generateIdFromEntropySize(10); // 16 characters long
-
-	// TODO: check if username is already used
-	await db.insert(userTable).values({
-		id: userId, 
-		name: name,
-		email: email,
-		password_hash: passwordHash,
-		location: null
+	const passwordHash = await hash(String(password), {
+		// recommended minimum parameters by lucia-auth
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
 	});
+    const userId = generateIdFromEntropySize(10);
+
+    await db.insert(userTable).values({
+        id: userId,
+        name: String(name),
+        email: String(email),
+        hashedPassword: passwordHash,
+        location: null
+    });
+
 
 	const session = await lucia.createSession(userId, {});
 	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
 });
-type s = UserId
-
-
-
-	/*
-	const body = await readBody<{ email: string; password: string , name: string}>(event);
-
-    // Check that the thing to be verified match the required criteria
-    const res = User.safeParse({email: body.email, password: body.password, name: body.name})
-    if(!res.success){
-        throw createError({ statusCode: 401, message: 'Invalid credentials' });
-    }
-
-	const hashedPassword = await hash(body.password, 10);
-	const [user] = await db
-		.insert(userTable)
-		.values({ email: body.email, hashedPassword, name: body.name })
-		.returning({ id: userTable.id });
-
-	const token = generateSessionToken();
-	const session = await createSession(token, user.id);
-
-	setSessionTokenCookie(event, token, session.expiresAt);
-
-	return { success: true };
-});
-*/

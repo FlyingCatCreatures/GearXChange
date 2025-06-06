@@ -8,6 +8,8 @@ import type { InferSelectModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 const sqliteDB = sqlite(":memory:");
+sqliteDB.pragma("foreign_keys = ON");
+
 export const db = drizzle(sqliteDB);
 
 export const userTable = sqliteTable("user", {
@@ -18,11 +20,10 @@ export const userTable = sqliteTable("user", {
   location: text("location")
 });
 
-const sessionTable = sqliteTable("session", {
+export const sessionTable = sqliteTable("session", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
-		.notNull()
-		.references(() => userTable.id),
+		.notNull(),
 	expiresAt: integer("expires_at").notNull()
 });
 
@@ -47,27 +48,25 @@ export const machineryListingsTable = sqliteTable("machinery_listings", {
   fuel_or_power: text("fuel_or_power").notNull(),
   weight: integer("weight"),
   views: integer("views").default(0),
-  user_id: text("user_id").notNull().references(() => userTable.id),
+  user_id: text("user_id").notNull(),
   created_at: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // --- FAVOURITE LISTINGS TABLE ---
 export const favouriteListingsTable = sqliteTable("favourite_listings", {
   id: text("id").primaryKey(),
-  user_id: text("user_id").notNull().references(() => userTable.id),
-  listing_id: text("listing_id").notNull().references(() => machineryListingsTable.id),
-  created_at: text("created_at").default("(datetime('now'))"),
+  user_id: text("user_id").notNull(),
+  listing_id: text("listing_id").notNull(),
+  created_at: text("created_at").default(sql`(datetime('now'))`),
 });
 
 export const biddingsTable = sqliteTable("biddings", {
   number: integer("number").primaryKey(),
   amount_bid: integer("amount").notNull(),
   user_id: text("user_id")
-    .notNull()
-    .references(() => userTable.id),
+    .notNull(),
   listing_id: text("listing_id")
     .notNull()
-    .references(() => machineryListingsTable.id)
 });
 // --- HELPERS ---
 export const adapter = new DrizzleSQLiteAdapter(db , sessionTable, userTable);

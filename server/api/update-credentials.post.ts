@@ -2,7 +2,7 @@ import { db, sessionTable, userTable } from '~/server/utils/db';
 import { eq } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
 import { z} from 'zod/v4';
-import { getUserIdFromSession } from '~/server/lib/session';
+import { lucia } from '../utils/auth';
 
 const UpdateUser = z.object({
   email: z.email().optional(),
@@ -12,17 +12,18 @@ const UpdateUser = z.object({
 
 export default defineEventHandler(async (event) => {
   // Get current user ID from session
-  const userId = await getUserIdFromSession(event);
+  const userId = event.context.user?.id
   if (!userId) {
     throw createError({ statusCode: 401, message: 'Unauthorized' });
   }
 
   // Fetch the full user object using the permanent user id from session.userId
-  const [session] = await db.select().from(sessionTable).where(eq(sessionTable.userId, userId)).limit(1);
+  const session = event.context.session
   if (!session) {
     throw createError({ statusCode: 404, message: 'Session not found' });
   }
-  const [user] = await db.select().from(userTable).where(eq(userTable.id, session.userId)).limit(1);
+
+  const user = event.context.user
   if (!user) {
     throw createError({ statusCode: 404, message: 'User not found' });
   }
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
     updates.location = body.location;
   }
 
-  console.log(updates)
+  //console.log(updates)
   if (Object.keys(updates).length === 0) {
     return { success: true, message: 'No changes made.' };
   }

@@ -1,18 +1,11 @@
-// server/api/logout.post.ts
-import { getCookie } from 'h3';
-import { validateSessionToken, invalidateSession } from '~/server/lib/session';
-import { deleteSessionTokenCookie } from '~/server/lib/cookies';
-
-export default defineEventHandler(async (event) => {
-	const token = getCookie(event, "session");
-	if (!token) return { success: true };
-
-	const { session } = await validateSessionToken(token);
-	if (session) {
-		await invalidateSession(session.id);
+export default eventHandler(async (event) => {
+    console.log(event.context)
+	if (!event.context.session) {
+		throw createError({
+			statusCode: 403
+		});
 	}
-
-	deleteSessionTokenCookie(event);
-
-	return { success: true };
+	await lucia.invalidateSession(event.context.session.id);
+    console.log("logged out")
+	appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
 });

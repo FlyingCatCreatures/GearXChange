@@ -1,8 +1,7 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const userId = await getUserIdFromSession(event);
-
-  if (userId == null) {
+  const userId = event.context.user?.id
+  if (!userId) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Not authenticated',

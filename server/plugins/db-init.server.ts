@@ -1,6 +1,7 @@
 import { db, userTable, machineryListingsTable } from '~/server/utils/db';
 
 export default defineNitroPlugin(async () => {
+    try{
   // Run table creation once on server startup
   db.run(`
     CREATE TABLE IF NOT EXISTS user (
@@ -16,8 +17,7 @@ export default defineNitroPlugin(async () => {
     CREATE TABLE IF NOT EXISTS session (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
-      expires_at INTEGER NOT NULL,
-      FOREIGN KEY(user_id) REFERENCES user(id)
+      expires_at INTEGER NOT NULL
     )
   `);
 
@@ -57,23 +57,21 @@ export default defineNitroPlugin(async () => {
       number TEXT PRIMARY KEY,
       amount INTEGER NOT NULL,
       user_id TEXT NOT NULL,
-      listing_id TEXT NOT NULL,
-      FOREIGN KEY(listing_id) REFERENCES machinery_listings(id),
-      FOREIGN KEY(user_id) REFERENCES user(id)
+      listing_id TEXT NOT NULL
     )
   `);
 
   // Insert default users if not present
   await db.insert(userTable).values([
-    { id: 1, email: 'john.doe@agritech.com', hashedPassword: 'hashedpassword1', name:"john" },
-    { id: 2, email: 'sarah.smith@greenvalley.org', hashedPassword: 'hashedpassword2', name: "sarah" },
-    { id: 3, email: 'mike.chen@premiumfarms.co', hashedPassword: 'hashedpassword3', name: "mike" }
+    { id: '1', email: 'john.doe@agritech.com', hashedPassword: 'hashedpassword1', name:"john" },
+    { id: '2', email: 'sarah.smith@greenvalley.org', hashedPassword: 'hashedpassword2', name: "sarah" },
+    { id: '3', email: 'mike.chen@premiumfarms.co', hashedPassword: 'hashedpassword3', name: "mike" }
   ]).onConflictDoNothing();
 
   // Insert default listings if not present
   await db.insert(machineryListingsTable).values([
     {
-      id: 1,
+      id: '1',
       title: 'John Deere 5075E Tractor',
       price: 32500,
       price_type: 'negotiable',
@@ -87,10 +85,10 @@ export default defineNitroPlugin(async () => {
       year_of_manufacture: 2018,
       fuel_or_power: 'Diesel',
       weight: 5075,
-      user_id: 1
+      user_id: '1'
     },
     {
-      id: 2,
+      id: '2',
       title: 'Bush Hog SQ720 Rotary Cutter',
       price: 2200,
       price_type: 'fixed',
@@ -104,10 +102,10 @@ export default defineNitroPlugin(async () => {
       year_of_manufacture: 2017,
       fuel_or_power: 'PTO Powered',
       weight: 1200,
-      user_id: 1
+      user_id: '1'
     },
     {
-      id: 3,
+      id: '3',
       title: 'Krone 4x4 Round Baler',
       price: 18500,
       price_type: 'negotiable',
@@ -121,7 +119,9 @@ export default defineNitroPlugin(async () => {
       year_of_manufacture: 2019,
       fuel_or_power: 'Hydraulic',
       weight: 3500,
-      user_id: 1
+      user_id: '1'
     }
   ]).onConflictDoNothing();
-});
+} catch (e) {
+    console.log(e)
+}});

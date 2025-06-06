@@ -7,6 +7,7 @@
         <label class="floating-label">
         <span>Name</span>
         <input
+            name="name"
             v-model="name"
             type="text"
             required
@@ -19,6 +20,7 @@
       <label class="floating-label">
         <span>Email</span>
         <input
+            name="email"
             v-model="email"
             type="text"
             class="input"
@@ -31,6 +33,7 @@
         <label class="floating-label">
         <span>password</span>
         <input
+            name="password"
             v-model="password"
             type="password"
             required
@@ -38,12 +41,6 @@
             class="input"
         />
         </label>
-    </div>
-    <div class="mb-2">
-    <label class="label">
-        <input type="checkbox" v-model="loginDirectly"  class="checkbox checkbox-accent" />
-        Log in directly?
-    </label>
     </div>
 
     <div>
@@ -63,7 +60,6 @@
 </template>
 
 <script setup lang="ts">
-const loginDirectly = ref(true)
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -77,62 +73,38 @@ const User = z.object({
   password: z.string().min(8)
 });
 
-async function handleSignup() {
+async function handleSignup(e: Event) {
+  e.preventDefault();
   loading.value = true
   error.value = ''
+
+  const form = e.target as HTMLFormElement;
+  const formData = new FormData(form);
+
+  // Optional: validate before sending
+  const parsed = User.safeParse({
+    email: formData.get("email"),
+    name: formData.get("name"),
+    password: formData.get("password")
+  });
+
+  if (!parsed.success) {
+    error.value = parsed.error.issues.map((issue) => issue.message).join("\n");
+    loading.value = false;
+    return;
+  }
 
   try {
     await $fetch('/api/signup', {
       method: 'POST',
-      body: User.parse({ email: email.value, password: password.value, name: name.value}),
-    })
+      body: formData
+    });
+    navigateTo('/') // Go to home page after either signing up
 
-    if(loginDirectly.value){
-        try {
-            await $fetch('/api/login', {
-            method: 'POST',
-            body: User.parse({email: email.value, password: password.value, name: name.value }),
-            })
-
-            useUser()
-
-            // Show toast after successful login
-            useToast().triggerToast('Logged in successfully')
-
-            // redirect on success 
-            navigateTo('/')
-        } catch (err: any) {
-            if(err instanceof z.ZodError){
-                let errmsg = ""
-                for(let i=0; i<err.issues.length;i++){
-                    if(i!=0) errmsg+="\n"
-                    errmsg+=err.issues[i].message 
-                }
-                error.value = errmsg
-            }
-            else{
-                error.value = err?.data?.message ?? 'Login failed'
-            }
-        } finally {
-            loading.value = false
-        }
-    }
-    navigateTo('/') // Go to home page after either logging in or signing up
-    
   } catch (err: any) {
-    if(err instanceof z.ZodError){
-        let errmsg = ""
-        for(let i=0; i<err.issues.length;i++){
-            if(i!=0) errmsg+="\n"
-            errmsg+=err.issues[i].message 
-        }
-        error.value = errmsg
-    }
-    else{
-        error.value = err?.data?.message ?? 'Signup failed'
-    }
+    error.value = err?.data?.message ?? 'Signup failed';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

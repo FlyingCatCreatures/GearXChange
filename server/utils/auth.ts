@@ -32,5 +32,5 @@ interface DatabaseUserAttributes {
     name: string;
     id: string;
     hashedPassword: string;
-    location: string;    
+    location: string | null;    
 }
