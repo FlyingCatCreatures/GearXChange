@@ -133,7 +133,7 @@ onMounted(() => {
         <!-- Search Bar with icon -->
         <div class="relative w-full sm:flex-1">
         <svg
-            class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-gray-500 pointer-events-none z-10"
+            class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-base-content pointer-events-none z-10"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
         >
@@ -151,24 +151,24 @@ onMounted(() => {
         </div>
 
     <!-- Sort Dropdown -->
-    <div class="relative w-10">
-        <select class="select select-bordered pl-10 pr-6" v-model="sortOption">
-            <option value="default">Default</option>
-            <option value="priceAsc">Price ↑</option>
-            <option value="priceDesc">Price ↓</option>
-        </select>
-        <svg
-            class="absolute left-3 top-1/2 -translate-y-7/20 h-5 w-5 opacity-50 text-gray-500 pointer-events-none"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-        >
+    <div class="relative w-full sm:w-auto">
+      <select class="select pl-10 w-full" v-model="sortOption">
+        <option value="default">Default</option>
+        <option value="priceAsc">Price ↑</option>
+        <option value="priceDesc">Price ↓</option>
+      </select>
+      <svg
+        class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 opacity-50 text-base-content pointer-events-none z-10"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M3 4h18M6 8h12M9 12h6M12 16h0M15 20h0" />
-        </svg>
+      </svg>
     </div>
     </div>
 </div>
