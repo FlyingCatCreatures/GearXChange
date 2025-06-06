@@ -7,8 +7,6 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Not authenticated',
     });
   } else {
-    console.log(userId, body.listing_id)
-    console.log(body)
     await addFavourite(userId, body.listing_id);
     return { success: true };
   }
