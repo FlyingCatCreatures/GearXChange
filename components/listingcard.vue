@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, watch, ref } from "vue";
+import { useUser } from "~/composables/useUser";
 
 // These are kind of like arguments this template receives, that get passed in to the template as references.
 const props = defineProps<{
@@ -8,6 +9,10 @@ const props = defineProps<{
   onToggleFavourite: (id: string) => void;
 }>();
 
+const emits = defineEmits(["deleted"]);
+const user = useUser();
+
+const showDeleteConfirm = ref(false);
 const showDetails = ref(false);
 
 // Once this card becomes visibles this triggers, letting the backend know it has been viewed and telling it to get the biddings
@@ -28,6 +33,11 @@ watch(showDetails, (visible) => {
 const topBids = computed(() => {
   return biddings.value.sort((a, b) => b.amount_bid - a.amount_bid).slice(0, 3); // top 3 bids get displayed
 });
+
+function confirmDeleteListing() {
+  showDeleteConfirm.value = false;
+  deleteListing();
+}
 
 const loading = ref(false);
 const errorMsg = ref("");
@@ -88,6 +98,36 @@ async function submitBid() {
     }
   } catch (err) {
     bidError.value = "Failed to place bid.";
+  }
+}
+
+const isOwner = computed(() => {
+  return user.value && user.value.id === props.listing.user_id;
+});
+
+const deleting = ref(false);
+const deleteError = ref("");
+
+async function deleteListing() {
+  deleting.value = true;
+  deleteError.value = "";
+  try {
+    const res = await fetch("/api/listings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listing_id: props.listing.id }),
+    });
+    const data = await res.json();
+    if (data.error) {
+      deleteError.value = data.error;
+    } else {
+      showDetails.value = false;
+      emits("deleted");
+    }
+  } catch (e) {
+    deleteError.value = "Failed to delete listing.";
+  } finally {
+    deleting.value = false;
   }
 }
 </script>
@@ -285,6 +325,46 @@ async function submitBid() {
             alt="Listing image"
           />
         </div>
+
+        <!-- Delete button (owner only) -->
+        <div v-if="isOwner" class="px-6 pb-4">
+          <button
+            @click="showDeleteConfirm = true"
+            class="btn btn-error btn-block"
+            :disabled="deleting"
+          >
+            <span v-if="deleting">Deleting...</span>
+            <span v-else>Delete Listing</span>
+          </button>
+          <p v-if="deleteError" class="text-error text-sm mt-1">
+            {{ deleteError }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    v-if="showDeleteConfirm"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
+  >
+    <div class="bg-base-100 p-6 rounded-lg shadow-lg w-full max-w-sm">
+      <h3 class="text-lg font-bold mb-4">Confirm Deletion</h3>
+      <p class="mb-6">
+        Are you sure you want to delete this listing? This action cannot be
+        undone.
+      </p>
+      <div class="flex justify-end gap-2">
+        <button class="btn btn-ghost" @click="showDeleteConfirm = false">
+          Cancel
+        </button>
+        <button
+          class="btn btn-error"
+          :disabled="deleting"
+          @click="confirmDeleteListing"
+        >
+          <span v-if="deleting">Deleting...</span>
+          <span v-else>Yes, Delete</span>
+        </button>
       </div>
     </div>
   </div>

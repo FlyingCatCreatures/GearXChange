@@ -149,12 +149,6 @@ onMounted(() => {
     <!-- Hero Section -->
     <section class="hero min-h-[25vh] bg-base-300 w-ful relative">
       <div class="hero-content flex-col text-center">
-        <button
-          class="btn btn-primary btn-lg absolute top-5 left-5"
-          @click="getListings"
-        >
-          Refresh Listings
-        </button>
         <div>
           <h1 class="text-5xl font-bold mb-4">GearXChange</h1>
           <p class="py-2 text-lg mb-6">
@@ -235,6 +229,7 @@ onMounted(() => {
           :listing="listing"
           :isFavourite="true"
           :onToggleFavourite="toggleFavourite"
+          @deleted="getListings"
         />
       </div>
     </section>
@@ -262,6 +257,7 @@ onMounted(() => {
               :listing="listing"
               :isFavourite="favouriteIds.has(listing.id)"
               :onToggleFavourite="toggleFavourite"
+              @deleted="getListings"
             />
           </div>
         </div>

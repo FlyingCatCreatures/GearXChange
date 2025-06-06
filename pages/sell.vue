@@ -96,21 +96,14 @@ async function handleCreateListing() {
     successMessage.value = "Listing created successfully!";
     errorMessage.value = "";
     await resetForm();
+    navigateTo("/");
+    useToast().triggerToast("Listing created successfully!");
     stepTwo.value = false;
   } catch (error) {
     console.error("Failed to create listing:", error);
     successMessage.value = "";
     errorMessage.value = "Failed to create listing. Please try again.";
   }
-}
-
-function formatPlateInput(raw: string): string {
-  let cleaned = raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-  let formatted = "";
-  if (cleaned.length > 0) formatted += cleaned.slice(0, 2);
-  if (cleaned.length > 2) formatted += "-" + cleaned.slice(2, 5);
-  if (cleaned.length > 5) formatted += "-" + cleaned.slice(5, 6);
-  return formatted;
 }
 
 async function resetForm() {
@@ -149,7 +142,7 @@ async function resetForm() {
         <input
           id="plate"
           v-model="plate"
-          @input="plate = formatPlateInput(plate)"
+          @input="plate = plate.toUpperCase().replace(/[^A-Z0-9-]/g, '')"
           type="text"
           maxlength="8"
           placeholder="XX-999-X"

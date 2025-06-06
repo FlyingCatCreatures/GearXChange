@@ -107,3 +107,24 @@ export async function getBiddings(listing_id: string | null) {
     .where(eq(biddingsTable.listing_id, String(listing_id)))
     .innerJoin(userTable, eq(biddingsTable.user_id, userTable.id));
 }
+
+export async function deleteListing(listing_id: string, user_id: string) {
+  // Only allow deletion if the user is the owner
+  const listing = await db
+    .select()
+    .from(machineryListingsTable)
+    .where(eq(machineryListingsTable.id, listing_id));
+  if (!listing.length) return { error: "Listing not found" };
+  if (listing[0].user_id !== user_id) return { error: "Not authorized" };
+  // Delete biddings and favourites for this listing first (to avoid foreign key issues)
+  await db
+    .delete(biddingsTable)
+    .where(eq(biddingsTable.listing_id, listing_id));
+  await db
+    .delete(favouriteListingsTable)
+    .where(eq(favouriteListingsTable.listing_id, listing_id));
+  await db
+    .delete(machineryListingsTable)
+    .where(eq(machineryListingsTable.id, listing_id));
+  return { success: true };
+}
