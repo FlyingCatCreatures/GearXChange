@@ -6,6 +6,5 @@ export default eventHandler(async (event) => {
 		});
 	}
 	await lucia.invalidateSession(event.context.session.id);
-    console.log("logged out")
 	appendHeader(event, "Set-Cookie", lucia.createBlankSessionCookie().serialize());
 });

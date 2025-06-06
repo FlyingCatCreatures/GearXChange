@@ -61,6 +61,8 @@ async function fileToBase64(file: any): Promise<string> {
 
 async function handleCreateListing() {
   try {
+    const pictureBase64 = pictureFile.value ? await fileToBase64(pictureFile.value) : null; // Parse file into a base64 encoding of itself to store in backend
+
     await $fetch('/api/listings', {
       method: 'POST',
       body: {
@@ -71,7 +73,7 @@ async function handleCreateListing() {
         price_type: priceType.value,
         condition: condition.value,
         location: location.value.trim(),
-        picture: await fileToBase64(pictureFile.value) || null, // Parse file into a base64 encoding of itself to store in backend
+        picture: pictureBase64, 
         description: description.value.trim() || null,
         make: make.value.trim(),
         model: model.value.trim(),
