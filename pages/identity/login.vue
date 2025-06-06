@@ -54,8 +54,8 @@ async function login(e: Event) {
 			method: "POST",
 			body: new FormData(e.target as HTMLFormElement)
 		});
-		useUser()
-		useToast().triggerToast("Logged in successfully")
+
+        useToast().triggerToast("Logged in successfully")
 		await navigateTo("/")
 	} catch (err: any) {
 		if (err?.data?.message) {

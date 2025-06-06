@@ -6,6 +6,7 @@ import { verify } from "@node-rs/argon2";
 
 
 import { z } from "zod/v4"; 
+import { lucia } from '../utils/auth';
 const User = z.object({ 
     email: z.email(),
     password: z.string().min(8)

@@ -99,6 +99,7 @@ async function handleSignup(e: Event) {
       method: 'POST',
       body: formData
     });
+    useToast().triggerToast("Signed up and Logged in successfully")
     navigateTo('/') // Go to home page after either signing up
 
   } catch (err: any) {

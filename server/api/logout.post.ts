@@ -1,5 +1,6 @@
+import { lucia } from "../utils/auth";
+
 export default eventHandler(async (event) => {
-    console.log(event.context)
 	if (!event.context.session) {
 		throw createError({
 			statusCode: 403

@@ -35,6 +35,7 @@ async function logout() {
 	await $fetch("/api/logout", {
 		method: "POST"
 	});
+    useToast().triggerToast("Logged out successfully")
 	await navigateTo("/");
 }
 </script>
