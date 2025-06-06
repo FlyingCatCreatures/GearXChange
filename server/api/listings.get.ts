@@ -1,4 +1,4 @@
-import { getListings } from '../lib/listings';
+import { getListings } from '../utils/listings';
 
 export default defineEventHandler(async (event) => {
   const ordering = getQuery(event).ordering as string | undefined;

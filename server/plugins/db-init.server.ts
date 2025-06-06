@@ -1,10 +1,10 @@
-import { db, userTable, machineryListingsTable } from '~/server/lib/db';
+import { db, userTable, machineryListingsTable } from '~/server/utils/db';
 
 export default defineNitroPlugin(async () => {
   // Run table creation once on server startup
   db.run(`
     CREATE TABLE IF NOT EXISTS user (
-      id INTEGER PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE,
       email TEXT NOT NULL UNIQUE,
       hashed_password TEXT NOT NULL,
@@ -15,7 +15,7 @@ export default defineNitroPlugin(async () => {
   db.run(`
     CREATE TABLE IF NOT EXISTS session (
       id TEXT PRIMARY KEY,
-      user_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
       expires_at INTEGER NOT NULL,
       FOREIGN KEY(user_id) REFERENCES user(id)
     )
@@ -23,7 +23,7 @@ export default defineNitroPlugin(async () => {
 
   db.run(`
     CREATE TABLE IF NOT EXISTS machinery_listings (
-      id INTEGER PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       price INTEGER,
       price_type TEXT NOT NULL,
@@ -38,16 +38,16 @@ export default defineNitroPlugin(async () => {
       fuel_or_power TEXT NOT NULL,
       weight INTEGER,
       views INTEGER DEFAULT 0,
-      user_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
 
   db.run(`
     CREATE TABLE IF NOT EXISTS favourite_listings (
-      id INTEGER PRIMARY KEY,
-      user_id INTEGER NOT NULL,
-      listing_id INTEGER NOT NULL,
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      listing_id TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
@@ -56,8 +56,8 @@ export default defineNitroPlugin(async () => {
     CREATE TABLE IF NOT EXISTS biddings (
       number TEXT PRIMARY KEY,
       amount INTEGER NOT NULL,
-      user_id INTEGER NOT NULL,
-      listing_id INTEGER NOT NULL,
+      user_id TEXT NOT NULL,
+      listing_id TEXT NOT NULL,
       FOREIGN KEY(listing_id) REFERENCES machinery_listings(id),
       FOREIGN KEY(user_id) REFERENCES user(id)
     )

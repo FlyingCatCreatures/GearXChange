@@ -1,4 +1,4 @@
-import { getFavouriteListings } from '../lib/listings';
+import { getFavouriteListings } from '../utils/listings';
 import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {

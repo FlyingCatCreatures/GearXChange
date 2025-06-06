@@ -1,4 +1,4 @@
-import { getBiddings } from '../lib/listings';
+import { getBiddings } from '../utils/listings';
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);

@@ -1,3 +1,5 @@
+import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
+
 import sqlite from "better-sqlite3";
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 import { drizzle } from "drizzle-orm/better-sqlite3";
@@ -9,21 +11,19 @@ const sqliteDB = sqlite(":memory:");
 export const db = drizzle(sqliteDB);
 
 export const userTable = sqliteTable("user", {
-  id: integer("id").primaryKey(),
+  id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
   email: text("email").notNull().unique(),
   hashedPassword: text("hashed_password").notNull(),
   location: text("location")
 });
 
-export const sessionTable = sqliteTable("session", {
-  id: text("id").primaryKey(),
-  userId: integer("user_id")
-    .notNull()
-    .references(() => userTable.id),
-  expiresAt: integer("expires_at", {
-    mode: "timestamp"
-  }).notNull()
+const sessionTable = sqliteTable("session", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => userTable.id),
+	expiresAt: integer("expires_at").notNull()
 });
 
 
@@ -32,7 +32,7 @@ export type Session = InferSelectModel<typeof sessionTable>
 
 // --- MACHINERY LISTINGS TABLE ---
 export const machineryListingsTable = sqliteTable("machinery_listings", {
-  id: integer("id").primaryKey(),
+  id: text("id").primaryKey(),
   title: text("title").notNull(),
   price: integer("price"), // Use integer for simplicity; change to real if needed
   price_type: text("price_type").notNull(),
@@ -47,15 +47,15 @@ export const machineryListingsTable = sqliteTable("machinery_listings", {
   fuel_or_power: text("fuel_or_power").notNull(),
   weight: integer("weight"),
   views: integer("views").default(0),
-  user_id: integer("user_id").notNull(),
+  user_id: text("user_id").notNull().references(() => userTable.id),
   created_at: text("created_at").default(sql`(datetime('now'))`),
 });
 
 // --- FAVOURITE LISTINGS TABLE ---
 export const favouriteListingsTable = sqliteTable("favourite_listings", {
-  id: integer("id").primaryKey(),
-  user_id: integer("user_id").notNull(),
-  listing_id: integer("listing_id").notNull(),
+  id: text("id").primaryKey(),
+  user_id: text("user_id").notNull().references(() => userTable.id),
+  listing_id: text("listing_id").notNull().references(() => machineryListingsTable.id),
   created_at: text("created_at").default("(datetime('now'))"),
 });
 
@@ -70,3 +70,5 @@ export const biddingsTable = sqliteTable("biddings", {
     .references(() => machineryListingsTable.id)
 });
 // --- HELPERS ---
+export const adapter = new DrizzleSQLiteAdapter(db , sessionTable, userTable);
+

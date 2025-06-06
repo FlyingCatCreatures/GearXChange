@@ -1,6 +1,3 @@
-import { addFavourite } from '../lib/listings';
-import { getUserIdFromSession } from '../lib/session';
-
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const userId = await getUserIdFromSession(event);

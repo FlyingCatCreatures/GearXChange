@@ -1,4 +1,4 @@
-import { removeFavourite } from '../lib/listings';
+import { removeFavourite } from '../utils/listings';
 import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {

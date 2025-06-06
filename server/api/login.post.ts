@@ -1,5 +1,5 @@
 // server/api/login.post.ts
-import { db, userTable } from '~/server/lib/db';
+import { db, userTable } from '~/server/utils/db';
 import { eq } from 'drizzle-orm';
 import { compare } from 'bcryptjs';
 import { generateSessionToken, createSession } from '~/server/lib/session';

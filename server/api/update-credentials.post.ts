@@ -1,4 +1,4 @@
-import { db, sessionTable, userTable } from '~/server/lib/db';
+import { db, sessionTable, userTable } from '~/server/utils/db';
 import { eq } from 'drizzle-orm';
 import { hash } from 'bcryptjs';
 import { z} from 'zod/v4';

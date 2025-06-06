@@ -1,4 +1,4 @@
-import { incrementListingViews } from '../lib/listings';
+import { incrementListingViews } from '../utils/listings';
 // import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {

@@ -1,4 +1,4 @@
-import { createListing } from '../lib/listings';
+import { createListing } from '../utils/listings';
 import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {

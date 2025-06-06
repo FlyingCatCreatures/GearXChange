@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { User } from '~/server/lib/db';
+import type { User } from '~/server/utils/db';
 
 const title = ref("");
 const price = ref<number | null>(null);

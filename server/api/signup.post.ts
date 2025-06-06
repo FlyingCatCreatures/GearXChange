@@ -1,8 +1,9 @@
 // server/api/signup.post.ts
-import { db, userTable } from '~/server/lib/db';
-import { generateSessionToken, createSession } from '~/server/lib/session';
-import { setSessionTokenCookie } from '~/server/lib/cookies';
+import { db, userTable } from '~/server/utils/db';
+import { generateIdFromEntropySize, UserId } from "lucia";
+import { SqliteError } from "better-sqlite3";
 import { hash } from 'bcryptjs';
+import { lucia } from '../utils/auth';
 
 import { z } from "zod/v4"; 
 const User = z.object({ 
@@ -11,7 +12,40 @@ const User = z.object({
     password: z.string().min(8)
 });
 
+
 export default defineEventHandler(async (event) => {
+	const formData = await readFormData(event);
+	const email = formData.get("email");
+	const password = formData.get("password");
+	const name = formData.get("name");
+	const res = User.safeParse({email: email, name: name, password: password})
+	if(res.error){
+		throw createError({
+			message: "Invalid password",
+			statusCode: 400
+		});
+	}
+
+	const passwordHash = hash(String(password), 10);
+	const userId = generateIdFromEntropySize(10); // 16 characters long
+
+	// TODO: check if username is already used
+	await db.insert(userTable).values({
+		id: userId, 
+		name: name,
+		email: email,
+		password_hash: passwordHash,
+		location: null
+	});
+
+	const session = await lucia.createSession(userId, {});
+	appendHeader(event, "Set-Cookie", lucia.createSessionCookie(session.id).serialize());
+});
+type s = UserId
+
+
+
+	/*
 	const body = await readBody<{ email: string; password: string , name: string}>(event);
 
     // Check that the thing to be verified match the required criteria
@@ -33,3 +67,4 @@ export default defineEventHandler(async (event) => {
 
 	return { success: true };
 });
+*/

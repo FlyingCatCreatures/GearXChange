@@ -1,4 +1,4 @@
-import { placeBid } from '../lib/listings';
+import { placeBid } from '../utils/listings';
 import { getUserIdFromSession } from '../lib/session';
 
 export default defineEventHandler(async (event) => {
